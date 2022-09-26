@@ -63,15 +63,15 @@ mod tests {
 
     #[test]
     fn point_method_creates_point() {
-        let a = Tuple::point(1.0, 2.0, 3.0);
-        assert!(a.is_point());
-        assert!(!a.is_vector());
+        let p = Tuple::point(1.0, 2.0, -3.0);
+        assert!(p.is_point());
+        assert!(!p.is_vector());
     }
 
     #[test]
     fn vector_method_creates_vector() {
-        let a = Tuple::vector(2.0, 3.0, 4.0);
-        assert!(!a.is_point());
-        assert!(a.is_vector());
+        let v = Tuple::vector(2.0, -3.0, 4.0);
+        assert!(!v.is_point());
+        assert!(v.is_vector());
     }
 }
