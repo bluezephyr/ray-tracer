@@ -1,3 +1,6 @@
+use std::ops::Add;
+
+#[derive(Debug, Copy, Clone)]
 struct Tuple {
     _x: f64,
     _y: f64,
@@ -30,6 +33,32 @@ impl Tuple {
 
     pub(crate) fn is_vector(&self) -> bool {
         return self._w == 0.0;
+    }
+}
+
+impl Add for Tuple {
+    type Output = Tuple;
+
+    fn add(self, rhs: Tuple) -> Tuple {
+        return Tuple {
+            _x: self._x + rhs._x,
+            _y: self._y + rhs._y,
+            _z: self._z + rhs._z,
+            _w: self._w + rhs._w,
+        };
+    }
+}
+
+impl PartialEq for Tuple {
+    fn eq(&self, other: &Self) -> bool {
+        return self._x == other._x
+            && self._y == other._y
+            && self._z == other._z
+            && self._w == other._w;
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        return !self.eq(other);
     }
 }
 
@@ -73,5 +102,18 @@ mod tests {
         let v = Tuple::vector(2.0, -3.0, 4.0);
         assert!(!v.is_point());
         assert!(v.is_vector());
+    }
+
+    #[test]
+    fn add_point_and_vector_creates_point() {
+        let p = Tuple::point(3.0, -2.0, 5.0);
+        let v = Tuple::vector(-2.0, 3.0, 1.0);
+        assert!(p + v == Tuple::point(1.0, 1.0, 6.0));
+        println!("{:?}", p);
+    }
+
+    #[test]
+    fn inifinity() {
+        let _inf = f64::INFINITY;
     }
 }
