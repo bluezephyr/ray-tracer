@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::{Add, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
 struct Tuple {
@@ -45,6 +45,32 @@ impl Add for Tuple {
             _y: self._y + rhs._y,
             _z: self._z + rhs._z,
             _w: self._w + rhs._w,
+        };
+    }
+}
+
+impl Sub for Tuple {
+    type Output = Tuple;
+
+    fn sub(self, rhs: Tuple) -> Tuple {
+        return Tuple {
+            _x: self._x - rhs._x,
+            _y: self._y - rhs._y,
+            _z: self._z - rhs._z,
+            _w: self._w - rhs._w,
+        };
+    }
+}
+
+impl Neg for Tuple {
+    type Output = Tuple;
+
+    fn neg(self) -> Tuple {
+        return Tuple {
+            _x: -self._x,
+            _y: -self._y,
+            _z: -self._z,
+            _w: -self._w,
         };
     }
 }
@@ -110,6 +136,63 @@ mod tests {
         let v = Tuple::vector(-2.0, 3.0, 1.0);
         assert!(p + v == Tuple::point(1.0, 1.0, 6.0));
         println!("{:?}", p);
+    }
+
+    #[test]
+    fn add_two_vectors_creates_vector() {
+        let v1 = Tuple::vector(3.0, -3.0, 4.0);
+        let v2 = Tuple::vector(-2.0, 4.0, 2.0);
+        assert!(v1 + v2 == Tuple::vector(1.0, 1.0, 6.0));
+        println!("{:?}", v1);
+    }
+
+    #[test]
+    fn subtract_two_vectors_creates_vector() {
+        let v1 = Tuple::vector(3.0, 2.0, 1.0);
+        let v2 = Tuple::vector(5.0, 6.0, 7.0);
+        assert!(v1 - v2 == Tuple::vector(-2.0, -4.0, -6.0));
+        println!("{:?}", v1);
+    }
+
+    #[test]
+    fn subtract_vector_from_point_creates_point() {
+        let p = Tuple::point(3.0, 2.0, 1.0);
+        let v = Tuple::vector(5.0, 6.0, 7.0);
+        assert!(p - v == Tuple::point(-2.0, -4.0, -6.0));
+        println!("{:?}", p);
+    }
+
+    #[test]
+    fn subtract_two_points_creates_vector() {
+        let p1 = Tuple::point(3.0, 3.0, 4.0);
+        let p2 = Tuple::point(2.0, 4.0, 2.0);
+        assert!(p1 - p2 == Tuple::vector(1.0, -1.0, 2.0));
+        println!("{:?}", p1);
+    }
+
+    #[test]
+    fn subtract_vector_from_zero_vector_negates_vector() {
+        let zero = Tuple::vector(0.0, 0.0, 0.0);
+        let v = Tuple::vector(1.0, -2.0, 3.0);
+        assert!(zero - v == Tuple::vector(-1.0, 2.0, -3.0));
+        println!("{:?}", v);
+    }
+
+    #[test]
+    fn negate_tuple_negates_all_components_of_tuple() {
+        let a = Tuple {
+            _x: 1.0,
+            _y: -2.0,
+            _z: 3.0,
+            _w: -4.0,
+        };
+        let neg_a = Tuple {
+            _x: -1.0,
+            _y: 2.0,
+            _z: -3.0,
+            _w: 4.0,
+        };
+        assert!(-a == neg_a);
     }
 
     #[test]
