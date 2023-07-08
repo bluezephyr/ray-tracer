@@ -1,4 +1,4 @@
-use std::ops::{Add, Neg, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
 struct Tuple {
@@ -71,6 +71,32 @@ impl Neg for Tuple {
             _y: -self._y,
             _z: -self._z,
             _w: -self._w,
+        };
+    }
+}
+
+impl Mul<f64> for Tuple {
+    type Output = Tuple;
+
+    fn mul(self, rhs: f64) -> Tuple {
+        return Tuple {
+            _x: self._x * rhs,
+            _y: self._y * rhs,
+            _z: self._z * rhs,
+            _w: self._w * rhs,
+        };
+    }
+}
+
+impl Div<f64> for Tuple {
+    type Output = Tuple;
+
+    fn div(self, rhs: f64) -> Tuple {
+        return Tuple {
+            _x: self._x / rhs,
+            _y: self._y / rhs,
+            _z: self._z / rhs,
+            _w: self._w / rhs,
         };
     }
 }
@@ -193,6 +219,60 @@ mod tests {
             _w: 4.0,
         };
         assert!(-a == neg_a);
+    }
+
+    #[test]
+    fn multiply_tuple_with_scalar() {
+        let a = Tuple {
+            _x: 1.0,
+            _y: -2.0,
+            _z: 3.0,
+            _w: -4.0,
+        };
+        let m_a = Tuple {
+            _x: 3.5,
+            _y: -7.0,
+            _z: 10.5,
+            _w: -14.0,
+        };
+        assert!(a * 3.5 == m_a);
+        println!("{:?}", a);
+    }
+
+    #[test]
+    fn multiply_tuple_with_fraction() {
+        let a = Tuple {
+            _x: 1.0,
+            _y: -2.0,
+            _z: 3.0,
+            _w: -4.0,
+        };
+        let m_a = Tuple {
+            _x: 0.5,
+            _y: -1.0,
+            _z: 1.5,
+            _w: -2.0,
+        };
+        assert!(a * 0.5 == m_a);
+        println!("{:?}", a);
+    }
+
+    #[test]
+    fn divide_tuple_with_scalar() {
+        let a = Tuple {
+            _x: 1.0,
+            _y: -2.0,
+            _z: 3.0,
+            _w: -4.0,
+        };
+        let m_a = Tuple {
+            _x: 0.5,
+            _y: -1.0,
+            _z: 1.5,
+            _w: -2.0,
+        };
+        assert!(a / 2.0 == m_a);
+        println!("{:?}", a);
     }
 
     #[test]
