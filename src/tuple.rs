@@ -38,6 +38,15 @@ impl Tuple {
     pub(crate) fn magnitude(&self) -> f64 {
         (self._x.powf(2.0) + self._y.powf(2.0) + self._z.powf(2.0)).sqrt()
     }
+
+    pub(crate) fn normalize(&self) -> Tuple {
+        return Tuple {
+            _x: self._x / self.magnitude(),
+            _y: self._y / self.magnitude(),
+            _z: self._z / self.magnitude(),
+            _w: 0.0,
+        };
+    }
 }
 
 impl Add for Tuple {
@@ -304,6 +313,27 @@ mod tests {
     fn magnitude_vector_1_2_3_is_sqrt_14() {
         let v = Tuple::vector(1.0, 2.0, 3.0);
         assert!(v.magnitude() == 14.0_f64.sqrt());
+        println!("{:?}", v);
+    }
+
+    #[test]
+    fn normalize_vector_4_0_0() {
+        let v = Tuple::vector(4.0, 0.0, 0.0);
+        assert!(v.normalize() == Tuple::vector(1.0, 0.0, 0.0));
+        println!("{:?}", v);
+    }
+
+    #[test]
+    fn normalize_vector_1_2_3() {
+        let v = Tuple::vector(1.0, 2.0, 3.0);
+        assert!(v.normalize() == Tuple::vector(1.0 / 14.0_f64.sqrt(), 2.0 / 14.0_f64.sqrt(), 3.0 / 14.0_f64.sqrt()));
+        println!("{:?}", v);
+    }
+
+    #[test]
+    fn magnitude_of_normalized_vector_is_1() {
+        let v = Tuple::vector(1.0, 2.0, 3.0);
+        assert!(v.normalize().magnitude() == 1.0);
         println!("{:?}", v);
     }
 
