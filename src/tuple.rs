@@ -1,7 +1,7 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
-struct Tuple {
+pub struct Tuple {
     _x: f64,
     _y: f64,
     _z: f64,
@@ -125,6 +125,10 @@ impl PartialEq for Tuple {
     fn ne(&self, other: &Self) -> bool {
         return !self.eq(other);
     }
+}
+
+pub fn dot(lhs: &Tuple, rhs: &Tuple) -> f64 {
+    return lhs._x * rhs._x + lhs._y * rhs._y + lhs._z * rhs._z + lhs._w * rhs._w;
 }
 
 #[cfg(test)]
@@ -326,7 +330,14 @@ mod tests {
     #[test]
     fn normalize_vector_1_2_3() {
         let v = Tuple::vector(1.0, 2.0, 3.0);
-        assert!(v.normalize() == Tuple::vector(1.0 / 14.0_f64.sqrt(), 2.0 / 14.0_f64.sqrt(), 3.0 / 14.0_f64.sqrt()));
+        assert!(
+            v.normalize()
+                == Tuple::vector(
+                    1.0 / 14.0_f64.sqrt(),
+                    2.0 / 14.0_f64.sqrt(),
+                    3.0 / 14.0_f64.sqrt()
+                )
+        );
         println!("{:?}", v);
     }
 
@@ -335,6 +346,13 @@ mod tests {
         let v = Tuple::vector(1.0, 2.0, 3.0);
         assert!(v.normalize().magnitude() == 1.0);
         println!("{:?}", v);
+    }
+
+    #[test]
+    fn dot_product_of_two_vectors() {
+        let v1 = Tuple::vector(1.0, 2.0, 3.0);
+        let v2 = Tuple::vector(2.0, 3.0, 4.0);
+        assert!(dot(&v1, &v2) == 20.0);
     }
 
     #[test]
