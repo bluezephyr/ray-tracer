@@ -34,6 +34,10 @@ impl Tuple {
     pub(crate) fn is_vector(&self) -> bool {
         return self._w == 0.0;
     }
+
+    pub(crate) fn magnitude(&self) -> f64 {
+        (self._x.powf(2.0) + self._y.powf(2.0) + self._z.powf(2.0)).sqrt()
+    }
 }
 
 impl Add for Tuple {
@@ -273,6 +277,34 @@ mod tests {
         };
         assert!(a / 2.0 == m_a);
         println!("{:?}", a);
+    }
+
+    #[test]
+    fn magnitude_vector_1_0_0_is_1() {
+        let v = Tuple::vector(1.0, 0.0, 0.0);
+        assert!(v.magnitude() == 1.0);
+        println!("{:?}", v);
+    }
+
+    #[test]
+    fn magnitude_vector_0_1_0_is_1() {
+        let v = Tuple::vector(0.0, 1.0, 0.0);
+        assert!(v.magnitude() == 1.0);
+        println!("{:?}", v);
+    }
+
+    #[test]
+    fn magnitude_vector_0_0_1_is_1() {
+        let v = Tuple::vector(0.0, 0.0, 1.0);
+        assert!(v.magnitude() == 1.0);
+        println!("{:?}", v);
+    }
+
+    #[test]
+    fn magnitude_vector_1_2_3_is_sqrt_14() {
+        let v = Tuple::vector(1.0, 2.0, 3.0);
+        assert!(v.magnitude() == 14.0_f64.sqrt());
+        println!("{:?}", v);
     }
 
     #[test]
