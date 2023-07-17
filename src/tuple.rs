@@ -131,6 +131,14 @@ pub fn dot(lhs: &Tuple, rhs: &Tuple) -> f64 {
     return lhs._x * rhs._x + lhs._y * rhs._y + lhs._z * rhs._z + lhs._w * rhs._w;
 }
 
+pub fn cross(lhs: &Tuple, rhs: &Tuple) -> Tuple {
+    return Tuple::vector(
+        lhs._y * rhs._z - lhs._z * rhs._y,
+        lhs._z * rhs._x - lhs._x * rhs._z,
+        lhs._x * rhs._y - lhs._y * rhs._x,
+    );
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -353,6 +361,14 @@ mod tests {
         let v1 = Tuple::vector(1.0, 2.0, 3.0);
         let v2 = Tuple::vector(2.0, 3.0, 4.0);
         assert!(dot(&v1, &v2) == 20.0);
+    }
+
+    #[test]
+    fn cross_product_of_two_vectors() {
+        let v1 = Tuple::vector(1.0, 2.0, 3.0);
+        let v2 = Tuple::vector(2.0, 3.0, 4.0);
+        assert!(cross(&v1, &v2) == Tuple::vector(-1.0, 2.0, -1.0));
+        assert!(cross(&v2, &v1) == Tuple::vector(1.0, -2.0, 1.0));
     }
 
     #[test]
