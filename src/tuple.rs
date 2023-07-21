@@ -2,49 +2,49 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Tuple {
-    _x: f64,
-    _y: f64,
-    _z: f64,
-    _w: f64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+    pub w: f64,
 }
 
 impl Tuple {
     pub(crate) fn point(x: f64, y: f64, z: f64) -> Tuple {
         return Tuple {
-            _x: x,
-            _y: y,
-            _z: z,
-            _w: 1.0,
+            x,
+            y,
+            z,
+            w: 1.0,
         };
     }
 
     pub(crate) fn vector(x: f64, y: f64, z: f64) -> Tuple {
         return Tuple {
-            _x: x,
-            _y: y,
-            _z: z,
-            _w: 0.0,
+            x,
+            y,
+            z,
+            w: 0.0,
         };
     }
 
     pub(crate) fn is_point(&self) -> bool {
-        return self._w == 1.0;
+        return self.w == 1.0;
     }
 
     pub(crate) fn is_vector(&self) -> bool {
-        return self._w == 0.0;
+        return self.w == 0.0;
     }
 
     pub(crate) fn magnitude(&self) -> f64 {
-        (self._x.powf(2.0) + self._y.powf(2.0) + self._z.powf(2.0)).sqrt()
+        (self.x.powf(2.0) + self.y.powf(2.0) + self.z.powf(2.0)).sqrt()
     }
 
     pub(crate) fn normalize(&self) -> Tuple {
         return Tuple {
-            _x: self._x / self.magnitude(),
-            _y: self._y / self.magnitude(),
-            _z: self._z / self.magnitude(),
-            _w: 0.0,
+            x: self.x / self.magnitude(),
+            y: self.y / self.magnitude(),
+            z: self.z / self.magnitude(),
+            w: 0.0,
         };
     }
 }
@@ -54,10 +54,10 @@ impl Add for Tuple {
 
     fn add(self, rhs: Tuple) -> Tuple {
         return Tuple {
-            _x: self._x + rhs._x,
-            _y: self._y + rhs._y,
-            _z: self._z + rhs._z,
-            _w: self._w + rhs._w,
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+            w: self.w + rhs.w,
         };
     }
 }
@@ -67,10 +67,10 @@ impl Sub for Tuple {
 
     fn sub(self, rhs: Tuple) -> Tuple {
         return Tuple {
-            _x: self._x - rhs._x,
-            _y: self._y - rhs._y,
-            _z: self._z - rhs._z,
-            _w: self._w - rhs._w,
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+            w: self.w - rhs.w,
         };
     }
 }
@@ -80,10 +80,10 @@ impl Neg for Tuple {
 
     fn neg(self) -> Tuple {
         return Tuple {
-            _x: -self._x,
-            _y: -self._y,
-            _z: -self._z,
-            _w: -self._w,
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+            w: -self.w,
         };
     }
 }
@@ -93,10 +93,10 @@ impl Mul<f64> for Tuple {
 
     fn mul(self, rhs: f64) -> Tuple {
         return Tuple {
-            _x: self._x * rhs,
-            _y: self._y * rhs,
-            _z: self._z * rhs,
-            _w: self._w * rhs,
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+            w: self.w * rhs,
         };
     }
 }
@@ -106,20 +106,20 @@ impl Div<f64> for Tuple {
 
     fn div(self, rhs: f64) -> Tuple {
         return Tuple {
-            _x: self._x / rhs,
-            _y: self._y / rhs,
-            _z: self._z / rhs,
-            _w: self._w / rhs,
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
+            w: self.w / rhs,
         };
     }
 }
 
 impl PartialEq for Tuple {
     fn eq(&self, other: &Self) -> bool {
-        return self._x == other._x
-            && self._y == other._y
-            && self._z == other._z
-            && self._w == other._w;
+        return self.x == other.x
+            && self.y == other.y
+            && self.z == other.z
+            && self.w == other.w;
     }
 
     fn ne(&self, other: &Self) -> bool {
@@ -128,14 +128,14 @@ impl PartialEq for Tuple {
 }
 
 pub fn dot(lhs: &Tuple, rhs: &Tuple) -> f64 {
-    return lhs._x * rhs._x + lhs._y * rhs._y + lhs._z * rhs._z + lhs._w * rhs._w;
+    return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w;
 }
 
 pub fn cross(lhs: &Tuple, rhs: &Tuple) -> Tuple {
     return Tuple::vector(
-        lhs._y * rhs._z - lhs._z * rhs._y,
-        lhs._z * rhs._x - lhs._x * rhs._z,
-        lhs._x * rhs._y - lhs._y * rhs._x,
+        lhs.y * rhs.z - lhs.z * rhs.y,
+        lhs.z * rhs.x - lhs.x * rhs.z,
+        lhs.x * rhs.y - lhs.y * rhs.x,
     );
 }
 
@@ -146,10 +146,10 @@ mod tests {
     #[test]
     fn tuple_with_w_1_0_is_a_point() {
         let a = Tuple {
-            _x: 0.0,
-            _y: 0.0,
-            _z: 0.0,
-            _w: 1.0,
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            w: 1.0,
         };
         assert!(a.is_point());
         assert!(!a.is_vector());
@@ -158,10 +158,10 @@ mod tests {
     #[test]
     fn tuple_with_w_0_0_is_a_vector() {
         let a = Tuple {
-            _x: 0.0,
-            _y: 0.0,
-            _z: 0.0,
-            _w: 0.0,
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            w: 0.0,
         };
         assert!(!a.is_point());
         assert!(a.is_vector());
@@ -232,16 +232,16 @@ mod tests {
     #[test]
     fn negate_tuple_negates_all_components_of_tuple() {
         let a = Tuple {
-            _x: 1.0,
-            _y: -2.0,
-            _z: 3.0,
-            _w: -4.0,
+            x: 1.0,
+            y: -2.0,
+            z: 3.0,
+            w: -4.0,
         };
         let neg_a = Tuple {
-            _x: -1.0,
-            _y: 2.0,
-            _z: -3.0,
-            _w: 4.0,
+            x: -1.0,
+            y: 2.0,
+            z: -3.0,
+            w: 4.0,
         };
         assert!(-a == neg_a);
     }
@@ -249,16 +249,16 @@ mod tests {
     #[test]
     fn multiply_tuple_with_scalar() {
         let a = Tuple {
-            _x: 1.0,
-            _y: -2.0,
-            _z: 3.0,
-            _w: -4.0,
+            x: 1.0,
+            y: -2.0,
+            z: 3.0,
+            w: -4.0,
         };
         let m_a = Tuple {
-            _x: 3.5,
-            _y: -7.0,
-            _z: 10.5,
-            _w: -14.0,
+            x: 3.5,
+            y: -7.0,
+            z: 10.5,
+            w: -14.0,
         };
         assert!(a * 3.5 == m_a);
         println!("{:?}", a);
@@ -267,16 +267,16 @@ mod tests {
     #[test]
     fn multiply_tuple_with_fraction() {
         let a = Tuple {
-            _x: 1.0,
-            _y: -2.0,
-            _z: 3.0,
-            _w: -4.0,
+            x: 1.0,
+            y: -2.0,
+            z: 3.0,
+            w: -4.0,
         };
         let m_a = Tuple {
-            _x: 0.5,
-            _y: -1.0,
-            _z: 1.5,
-            _w: -2.0,
+            x: 0.5,
+            y: -1.0,
+            z: 1.5,
+            w: -2.0,
         };
         assert!(a * 0.5 == m_a);
         println!("{:?}", a);
@@ -285,16 +285,16 @@ mod tests {
     #[test]
     fn divide_tuple_with_scalar() {
         let a = Tuple {
-            _x: 1.0,
-            _y: -2.0,
-            _z: 3.0,
-            _w: -4.0,
+            x: 1.0,
+            y: -2.0,
+            z: 3.0,
+            w: -4.0,
         };
         let m_a = Tuple {
-            _x: 0.5,
-            _y: -1.0,
-            _z: 1.5,
-            _w: -2.0,
+            x: 0.5,
+            y: -1.0,
+            z: 1.5,
+            w: -2.0,
         };
         assert!(a / 2.0 == m_a);
         println!("{:?}", a);
