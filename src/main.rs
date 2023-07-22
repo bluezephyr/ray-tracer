@@ -1,3 +1,4 @@
+mod color;
 mod tuple;
 
 struct Projectile {
@@ -14,7 +15,6 @@ fn tick(environment: &Environment, projectile: &mut Projectile) {
     projectile.position = projectile.position + projectile.velocity;
     projectile.velocity = projectile.velocity + environment.gravity + environment.wind;
 }
-
 
 fn main() {
     println!("Welcome to the simple Ray Tracer!");

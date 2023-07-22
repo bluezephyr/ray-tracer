@@ -10,21 +10,11 @@ pub struct Tuple {
 
 impl Tuple {
     pub(crate) fn point(x: f64, y: f64, z: f64) -> Tuple {
-        return Tuple {
-            x,
-            y,
-            z,
-            w: 1.0,
-        };
+        return Tuple { x, y, z, w: 1.0 };
     }
 
     pub(crate) fn vector(x: f64, y: f64, z: f64) -> Tuple {
-        return Tuple {
-            x,
-            y,
-            z,
-            w: 0.0,
-        };
+        return Tuple { x, y, z, w: 0.0 };
     }
 
     pub(crate) fn is_point(&self) -> bool {
@@ -116,10 +106,7 @@ impl Div<f64> for Tuple {
 
 impl PartialEq for Tuple {
     fn eq(&self, other: &Self) -> bool {
-        return self.x == other.x
-            && self.y == other.y
-            && self.z == other.z
-            && self.w == other.w;
+        return self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w;
     }
 
     fn ne(&self, other: &Self) -> bool {
