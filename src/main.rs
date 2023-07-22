@@ -1,14 +1,16 @@
 mod color;
 mod tuple;
 
+use tuple::Tuple;
+
 struct Projectile {
-    position: tuple::Tuple,
-    velocity: tuple::Tuple,
+    position: Tuple,
+    velocity: Tuple,
 }
 
 struct Environment {
-    gravity: tuple::Tuple,
-    wind: tuple::Tuple,
+    gravity: Tuple,
+    wind: Tuple,
 }
 
 fn tick(environment: &Environment, projectile: &mut Projectile) {
@@ -20,13 +22,13 @@ fn main() {
     println!("Welcome to the simple Ray Tracer!");
 
     let mut projectile = Projectile {
-        position: tuple::Tuple::point(0.0, 2.0, 0.0),
-        velocity: tuple::Tuple::vector(1.0, 1.0, 0.0).normalize() * 2.0,
+        position: Tuple::point(0.0, 2.0, 0.0),
+        velocity: Tuple::vector(1.0, 1.0, 0.0).normalize() * 2.0,
     };
 
     let environment = Environment {
-        gravity: tuple::Tuple::vector(0.0, -0.1, 0.0),
-        wind: tuple::Tuple::vector(-0.01, 0.0, 0.0),
+        gravity: Tuple::vector(0.0, -0.1, 0.0),
+        wind: Tuple::vector(-0.01, 0.0, 0.0),
     };
 
     while projectile.position.y > 0.0 {
