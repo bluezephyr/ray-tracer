@@ -8,15 +8,33 @@ pub struct Color {
     pub blue: f64,
 }
 
+pub struct ColorU8 {
+    pub red: u8,
+    pub green: u8,
+    pub blue: u8,
+}
+
 pub fn approximate_eq(lhs: Color, rhs: Color) -> bool {
     (lhs.red - rhs.red).abs() < EPSILON
         && (lhs.red - rhs.red).abs() < EPSILON
         && (lhs.red - rhs.red).abs() < EPSILON
 }
 
+fn normalize_u8_part(part: f64) -> u8 {
+    return (part * 255.0).round() as u8;
+}
+
 impl Color {
     pub(crate) fn color(red: f64, green: f64, blue: f64) -> Color {
         return Color { red, green, blue };
+    }
+
+    pub fn normalize_u8(&self) -> ColorU8 {
+        return ColorU8 {
+            red : normalize_u8_part(self.red),
+            green : normalize_u8_part(self.green),
+            blue : normalize_u8_part(self.blue),
+        }
     }
 }
 
@@ -116,5 +134,22 @@ mod tests {
         let c1 = Color::color(1.0, 0.2, 0.4);
         let c2 = Color::color(0.9, 1.0, 0.1);
         assert!(approximate_eq(c1 * c2, Color::color(0.9, 0.2, 0.04)));
+    }
+
+    #[test]
+    fn normalize_parts() {
+        assert!(normalize_u8_part(0.0) == 0);
+        assert!(normalize_u8_part(0.1) == 26);
+        assert!(normalize_u8_part(0.2) == 51);
+        assert!(normalize_u8_part(0.3) == 77); // Rust rounds ties away from zero
+        assert!(normalize_u8_part(0.4) == 102);
+        assert!(normalize_u8_part(0.5) == 128);
+        assert!(normalize_u8_part(0.6) == 153);
+        assert!(normalize_u8_part(0.7) == 179); // Rust rounds ties away from zero
+        assert!(normalize_u8_part(0.8) == 204);
+        assert!(normalize_u8_part(0.9) == 230);
+        assert!(normalize_u8_part(1.0) == 255);
+        assert!(normalize_u8_part(-0.1) == 0);
+        assert!(normalize_u8_part(-10.1) == 0);
     }
 }
