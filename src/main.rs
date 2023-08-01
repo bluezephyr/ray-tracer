@@ -46,8 +46,14 @@ fn main() {
     canvas.write_pixel(2, 1, Color::color(0.0, 0.5, 0.0));
     canvas.write_pixel(2, 2, Color::color(0.5, 0.0, 0.0));
     canvas.write_pixel(4, 2, Color::color(-0.5, 0.0, 1.5));
-    p.save_canvas(canvas);
+    p.add_canvas(canvas);
+    p.write_file();
     println!("'{}'", p.lines[3]);
+    println!("'{}'", p.lines[4]);
+
+    let c2 = Canvas::create(36, 3);
+    let mut p2 = Ppm::new("test2.ppm".to_string());
+    p2.add_canvas(c2);
 
     println!("End x position: {}", projectile.position.x);
 }

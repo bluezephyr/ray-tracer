@@ -15,3 +15,7 @@ Cargo.lock
 /target
 
 .idea/
+
+# Do not version control the generated images
+**/*.ppm
+
