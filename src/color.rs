@@ -31,10 +31,10 @@ impl Color {
 
     pub fn normalize_u8(&self) -> ColorU8 {
         return ColorU8 {
-            red : normalize_u8_part(self.red),
-            green : normalize_u8_part(self.green),
-            blue : normalize_u8_part(self.blue),
-        }
+            red: normalize_u8_part(self.red),
+            green: normalize_u8_part(self.green),
+            blue: normalize_u8_part(self.blue),
+        };
     }
 }
 

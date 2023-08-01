@@ -6,7 +6,12 @@ pub struct Canvas {
     pub height: usize,
     pixels: Vec<Vec<Color>>,
     _x: usize,
-    _y: usize
+    _y: usize,
+}
+
+pub struct Coordinate {
+    pub x: usize,
+    pub y: usize,
 }
 
 impl Canvas {

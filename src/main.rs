@@ -4,9 +4,9 @@ mod ppm;
 mod tuple;
 
 use crate::color::Color;
-use tuple::Tuple;
+use canvas::{Canvas, Coordinate};
 use ppm::Ppm;
-use canvas::Canvas;
+use tuple::Tuple;
 
 struct Projectile {
     position: Tuple,
@@ -23,37 +23,38 @@ fn tick(environment: &Environment, projectile: &mut Projectile) {
     projectile.velocity = projectile.velocity + environment.gravity + environment.wind;
 }
 
+fn get_canvas_coordinate(x: f64, y: f64, height: usize) -> Coordinate {
+    return Coordinate {
+        x: x as usize,
+        y: height - y as usize,
+    };
+}
+
+fn print_trajectory(canvas: &mut Canvas, projectile: &mut Projectile, environment: Environment) {
+    let white = Color::color(1.0, 1.0, 1.0);
+    while projectile.position.y > 0.0 {
+        tick(&environment, projectile);
+        let c = get_canvas_coordinate(projectile.position.x, projectile.position.y, canvas.height);
+        canvas.write_pixel(c.x, c.y, white);
+    }
+}
+
 fn main() {
     println!("Welcome to the simple Ray Tracer!");
 
-    let mut projectile = Projectile {
-        position: Tuple::point(0.0, 2.0, 0.0),
-        velocity: Tuple::vector(1.0, 1.0, 0.0).normalize() * 2.0,
+    let mut ball = Projectile {
+        position: Tuple::point(0.0, 1.0, 0.0),
+        velocity: Tuple::vector(1.0, 1.8, 0.0).normalize() * 11.25,
     };
 
-    let environment = Environment {
+    let garden = Environment {
         gravity: Tuple::vector(0.0, -0.1, 0.0),
         wind: Tuple::vector(-0.01, 0.0, 0.0),
     };
 
-    while projectile.position.y > 0.0 {
-        tick(&environment, &mut projectile);
-    }
-
-    let mut canvas = Canvas::create(5, 3);
-    let mut p = Ppm::new("test.ppm".to_string());
-    canvas.write_pixel(0, 0, Color::color(1.5, 0.0, 0.0));
-    canvas.write_pixel(2, 1, Color::color(0.0, 0.5, 0.0));
-    canvas.write_pixel(2, 2, Color::color(0.5, 0.0, 0.0));
-    canvas.write_pixel(4, 2, Color::color(-0.5, 0.0, 1.5));
-    p.add_canvas(canvas);
-    p.write_file();
-    println!("'{}'", p.lines[3]);
-    println!("'{}'", p.lines[4]);
-
-    let c2 = Canvas::create(36, 3);
-    let mut p2 = Ppm::new("test2.ppm".to_string());
-    p2.add_canvas(c2);
-
-    println!("End x position: {}", projectile.position.x);
+    let mut image = Ppm::new("ball.ppm".to_string());
+    let mut canvas = Canvas::create(900, 550);
+    print_trajectory(&mut canvas, &mut ball, garden);
+    image.add_canvas(canvas);
+    image.write_file();
 }
