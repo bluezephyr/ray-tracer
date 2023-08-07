@@ -2,6 +2,7 @@ mod canvas;
 mod color;
 mod ppm;
 mod tuple;
+mod matrices;
 
 use crate::color::Color;
 use canvas::{Canvas, Coordinate};
