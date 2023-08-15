@@ -1,21 +1,42 @@
+use crate::Tuple;
 use std::ops::Mul;
 
-pub struct Matrix<const ROWS: usize, const COLS: usize> {
-    data: [[f64; COLS]; ROWS],
+// Module to handle matrix operations.
+//
+// The notation is as follows
+//
+//  Matrix A (R rows, C columns)
+//      a11  a12  ...   a1n
+//      a21  a22  ...   a1n
+//      a31  a32  ...   a1n
+//       .    .          .
+//      am1  am2  ...   amn
+//
+//  Matrix B (P rows, Q columns)
+//      b11  b12  ...   b1q
+//      b21  b22  ...   b1q
+//      b31  b32  ...   b1q
+//       .    .          .
+//      bp1  bp2  ...   bpq
+//
+
+#[derive(Debug)]
+pub struct Matrix<const R: usize, const C: usize> {
+    data: [[f64; C]; R],
 }
 
-impl<const ROWS: usize, const COLS: usize> Matrix<ROWS, COLS> {
+impl<const R: usize, const C: usize> Matrix<R, C> {
     fn new() -> Self {
-        let data = [[0.0; COLS]; ROWS];
+        let data = [[0.0; C]; R];
         Matrix { data }
     }
 
-    fn new_init(data: [[f64; COLS]; ROWS]) -> Self {
+    fn new_init(data: [[f64; C]; R]) -> Self {
         Matrix { data }
     }
 }
 
-impl<const ROWS: usize, const COLS: usize> PartialEq for Matrix<ROWS, COLS> {
+impl<const R: usize, const C: usize> PartialEq for Matrix<R, C> {
     fn eq(&self, other: &Self) -> bool {
         return self.data == other.data;
     }
@@ -25,23 +46,34 @@ impl<const ROWS: usize, const COLS: usize> PartialEq for Matrix<ROWS, COLS> {
     }
 }
 
-// A * B = M
-impl<const ROWS: usize, const COLS: usize> Mul for Matrix<ROWS, COLS> {
-    type Output = Matrix<ROWS, COLS>;
+// Multiplication of two matrices A * B
+// The number of columns in A must match the number of rows in B
+// i.e. A is <R, C> and B is <P, Q>, where C == P
+// The output is a matrix of size <R ,Q>
+impl<const R: usize, const C: usize, const Q: usize> Mul<&Matrix<C, Q>> for &Matrix<R, C> {
+    type Output = Matrix<R, Q>;
 
-    fn mul(self, other: Matrix<ROWS, COLS>) -> Matrix<ROWS, COLS> {
-        let mut result = Matrix::<ROWS, COLS>::new();
+    fn mul(self, other: &Matrix<C, Q>) -> Matrix<R, Q> {
+        let mut result = Matrix::<R, Q>::new();
 
-        // Each col in B will 'generate' a col in M
-        for col in 0..COLS {
-            for row in 0..ROWS {
-                for item in 0..ROWS {
+        // Each col in B will 'generate' a col in the result Matrix
+        for col in 0..Q {
+            for row in 0..R {
+                for item in 0..C {
                     result.data[row][col] =
                         result.data[row][col] + self.data[row][item] * other.data[item][col]
                 }
             }
         }
         return result;
+    }
+}
+
+impl Mul<&Tuple> for &Matrix<4, 4> {
+    type Output = Matrix<4, 1>;
+
+    fn mul(self, t: &Tuple) -> Matrix<4, 1> {
+        return self * &Matrix::<4, 1>::new_init([[t.x], [t.y], [t.z], [t.w]]);
     }
 }
 
@@ -102,54 +134,127 @@ mod tests {
             [9.0, 10.0, 11.0, 12.0],
             [13.0, 14.0, 15.0, 16.0],
         ]);
-        let b = Matrix::<4, 4>::new_init([
+        let b = Matrix::new_init([
             [1.0, 2.0, 3.0, 4.0],
             [5.0, 6.0, 7.0, 8.0],
             [9.0, 10.0, 11.0, 12.0],
             [13.0, 14.0, 15.0, 16.0],
         ]);
-        assert!(a == b);
+        assert_eq!(a, b);
     }
 
     #[test]
     fn matrices_diffrent() {
-        let a = Matrix::<4, 4>::new_init([
+        let a = Matrix::new_init([
             [5.0, 6.0, 7.0, 8.0],
             [9.0, 10.0, 11.0, 12.0],
             [13.0, 14.0, 15.0, 16.0],
             [1.0, 2.0, 3.0, 4.0],
         ]);
-        let b = Matrix::<4, 4>::new_init([
+        let b = Matrix::new_init([
             [1.0, 2.0, 3.0, 4.0],
             [5.0, 6.0, 7.0, 8.0],
             [9.0, 10.0, 11.0, 12.0],
             [13.0, 14.0, 15.0, 16.0],
         ]);
-        assert!(a != b);
+        assert_ne!(a, b);
     }
 
     #[test]
     fn multiply_4x4_matrices() {
-        let a = Matrix::<4, 4>::new_init([
+        let a = Matrix::new_init([
             [1.0, 2.0, 3.0, 4.0],
             [5.0, 6.0, 7.0, 8.0],
             [9.0, 8.0, 7.0, 6.0],
             [5.0, 4.0, 3.0, 2.0],
         ]);
-        let b = Matrix::<4, 4>::new_init([
+        let b = Matrix::new_init([
             [-2.0, 1.0, 2.0, 3.0],
             [3.0, 2.0, 1.0, -1.0],
             [4.0, 3.0, 6.0, 5.0],
             [1.0, 2.0, 7.0, 8.0],
         ]);
-        assert!(
-            a * b
-                == Matrix::<4, 4>::new_init([
-                    [20.0, 22.0, 50.0, 48.0],
-                    [44.0, 54.0, 114.0, 108.0],
-                    [40.0, 58.0, 110.0, 102.0],
-                    [16.0, 26.0, 46.0, 42.0],
-                ])
+        assert_eq!(
+            &a * &b,
+            Matrix::new_init([
+                [20.0, 22.0, 50.0, 48.0],
+                [44.0, 54.0, 114.0, 108.0],
+                [40.0, 58.0, 110.0, 102.0],
+                [16.0, 26.0, 46.0, 42.0],
+            ])
+        );
+    }
+
+    #[test]
+    fn multiply_different_size_matrices() {
+        let a = Matrix::new_init([
+            [1.0, 2.0, 3.0], //
+            [4.0, 5.0, 6.0],
+        ]);
+        let b = Matrix::new_init([
+            [7.0, 8.0],  //
+            [9.0, 10.0], //
+            [11.0, 12.0],
+        ]);
+
+        assert_eq!(
+            &a * &b,
+            Matrix::new_init([
+                [58.0, 64.0], //
+                [139.0, 154.0]
+            ])
+        );
+    }
+
+    #[test]
+    fn multiply_4x4_matrix_with_4x1_matrix() {
+        let a = Matrix::new_init([
+            [1.0, 2.0, 3.0, 4.0],
+            [2.0, 4.0, 4.0, 2.0],
+            [8.0, 6.0, 4.0, 1.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]);
+        let t = Matrix::new_init([
+            [1.0], //
+            [2.0], //
+            [3.0], //
+            [1.0], //
+        ]);
+
+        assert_eq!(
+            &a * &t,
+            Matrix::new_init([
+                [18.0], //
+                [24.0], //
+                [33.0], //
+                [1.0]
+            ])
+        );
+    }
+
+    #[test]
+    fn multiply_4x4_matrix_with_tuple() {
+        let a = Matrix::new_init([
+            [1.0, 2.0, 3.0, 4.0],
+            [2.0, 4.0, 4.0, 2.0],
+            [8.0, 6.0, 4.0, 1.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]);
+        let t = Tuple {
+            x: 1.0,
+            y: 2.0,
+            z: 3.0,
+            w: 1.0,
+        };
+
+        assert_eq!(
+            &a * &t,
+            Matrix::new_init([
+                [18.0], //
+                [24.0], //
+                [33.0], //
+                [1.0]
+            ])
         );
     }
 }
