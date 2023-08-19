@@ -36,6 +36,28 @@ impl<const R: usize, const C: usize> Matrix<R, C> {
     }
 }
 
+// The methods below are only applicable on square matrices
+impl<const R: usize> Matrix<R, R> {
+    // Create an identity Matrix
+    fn new_identity() -> Self {
+        let mut m = Matrix::new();
+        for i in 0..R {
+            m.data[i][i] = 1.0;
+        }
+        return m;
+    }
+
+    fn transpose(&self) -> Self {
+        let mut transposed = Matrix::new_init(self.data);
+        for row in 0..R {
+            for col in 0..R {
+                transposed.data[row][col] = self.data[col][row];
+            }
+        }
+        return transposed;
+    }
+}
+
 impl<const R: usize, const C: usize> PartialEq for Matrix<R, C> {
     fn eq(&self, other: &Self) -> bool {
         return self.data == other.data;
@@ -256,5 +278,40 @@ mod tests {
                 [1.0]
             ])
         );
+    }
+
+    #[test]
+    fn multiply_4x4_matrix_with_identity_matrix() {
+        let a = Matrix::new_init([
+            [1.0, 2.0, 3.0, 4.0],
+            [2.0, 4.0, 4.0, 2.0],
+            [8.0, 6.0, 4.0, 1.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]);
+        let i = Matrix::<4, 4>::new_identity();
+        assert!(&a * &i == a);
+    }
+
+    #[test]
+    fn transpose_4x4_matrix() {
+        let a = Matrix::new_init([
+            [0.0, 9.0, 3.0, 0.0],
+            [9.0, 8.0, 0.0, 8.0],
+            [1.0, 8.0, 5.0, 3.0],
+            [0.0, 0.0, 5.0, 8.0],
+        ]);
+        let a_transposed = Matrix::new_init([
+            [0.0, 9.0, 1.0, 0.0],
+            [9.0, 8.0, 8.0, 0.0],
+            [3.0, 0.0, 5.0, 5.0],
+            [0.0, 8.0, 3.0, 8.0],
+        ]);
+        assert!(a.transpose() == a_transposed);
+    }
+
+    #[test]
+    fn transpose_identity_matrix_returns_identity_matrix() {
+        let identity = Matrix::<3, 3>::new_identity();
+        assert!(identity.transpose() == identity);
     }
 }
