@@ -25,6 +25,11 @@ pub struct Matrix<const R: usize, const C: usize> {
     data: [[f64; C]; R],
 }
 
+pub trait Submatrix<Rhs = Self> {
+    type Output;
+    fn submatrix(self, row: usize, col: usize) -> Option<Self::Output>;
+}
+
 impl<const R: usize, const C: usize> Matrix<R, C> {
     fn new() -> Self {
         let data = [[0.0; C]; R];
@@ -35,12 +40,6 @@ impl<const R: usize, const C: usize> Matrix<R, C> {
         Matrix { data }
     }
 }
-
-// impl<const R: usize, const C: usize, const P: usize, const Q: usize> Matrix<R, C> {
-//     fn submatrix(&self, row: usize, col: usize) -> Matrix<P, Q> {
-//         return Matrix::new<P, Q>();
-//     }
-// }
 
 // The methods below are only applicable on square matrices
 impl<const R: usize> Matrix<R, R> {
@@ -114,47 +113,24 @@ impl Matrix<2, 2> {
 }
 
 // Since feature(generic_const_exprs) is experimental (see https://github.com/rust-lang/rust/issues/76560)
-// there is currently no generic way to implement certain operations. Thus, these needs to be
-// specific.
-impl Matrix<3, 3> {
-    fn submatrix_3x3(&self, row: usize, col: usize) -> Option<Matrix<2, 2>> {
-        if row > 2 || col > 2 {
+// there is currently no generic way to check the size of the output at compile time.
+impl<const R: usize, const C: usize, const P: usize, const Q: usize> Submatrix<&Matrix<P, Q>>
+    for &Matrix<R, C>
+{
+    type Output = Matrix<P, Q>;
+
+    fn submatrix(self, row: usize, col: usize) -> Option<Matrix<P, Q>> {
+        if row >= R || col >= C || R - 1 != P || C - 1 != Q {
             return None;
         }
 
-        let mut s = Matrix::<2, 2>::new();
+        let mut s = Matrix::<P, Q>::new();
         let mut out_row = 0;
 
-        for r in 0..3 {
+        for r in 0..R {
             let mut out_col = 0;
             if r != row {
-                for c in 0..3 {
-                    if c != col {
-                        s.data[out_row][out_col] = self.data[r][c];
-                        out_col = out_col + 1;
-                    }
-                }
-                out_row = out_row + 1;
-            }
-        }
-
-        return Some(s);
-    }
-}
-
-impl Matrix<4, 4> {
-    fn submatrix_4x4(&self, row: usize, col: usize) -> Option<Matrix<3, 3>> {
-        if row > 3 || col > 3 {
-            return None;
-        }
-
-        let mut s = Matrix::<3, 3>::new();
-        let mut out_row = 0;
-
-        for r in 0..4 {
-            let mut out_col = 0;
-            if r != row {
-                for c in 0..4 {
+                for c in 0..C {
                     if c != col {
                         s.data[out_row][out_col] = self.data[r][c];
                         out_col = out_col + 1;
@@ -399,17 +375,25 @@ mod tests {
             [-3.0, 2.0, 7.0], //
             [0.0, 6.0, -3.0], //
         ]);
-        assert_eq!(m.submatrix_3x3(3, 0), None);
-        assert_eq!(m.submatrix_3x3(0, 3), None);
+        let m_sub: Option<Matrix<2, 2>> = m.submatrix(3, 0);
+        assert_eq!(m_sub, None);
+        let m_sub: Option<Matrix<2, 2>> = m.submatrix(0, 3);
+        assert_eq!(m_sub, None);
+        let m_sub: Option<Matrix<1, 2>> = m.submatrix(0, 0);
+        assert_eq!(m_sub, None);
+        let m_sub: Option<Matrix<2, 3>> = m.submatrix(0, 0);
+        assert_eq!(m_sub, None);
+        let m_sub: Option<Matrix<2, 2>> = m.submatrix(0, 2);
         assert_eq!(
-            m.submatrix_3x3(0, 2),
+            m_sub,
             Some(Matrix::new_init([
                 [-3.0, 2.0], //
                 [0.0, 6.0],  //
             ]))
         );
+        let m_sub: Option<Matrix<2, 2>> = m.submatrix(2, 1);
         assert_eq!(
-            m.submatrix_3x3(2, 1),
+            m_sub,
             Some(Matrix::new_init([
                 [1.0, 0.0],  //
                 [-3.0, 7.0], //
@@ -418,25 +402,33 @@ mod tests {
     }
 
     #[test]
-    fn calculate_subnatrix_for_4x4_matrix() {
+    fn calculate_submatrix_for_4x4_matrix() {
         let m = Matrix::new_init([
             [-6.0, 1.0, 1.0, 6.0],
             [-8.0, 5.0, 8.0, 6.0],
             [-1.0, 0.0, 8.0, 2.0],
             [-7.0, 1.0, -1.0, 1.0],
         ]);
-        assert_eq!(m.submatrix_4x4(4, 0), None);
-        assert_eq!(m.submatrix_4x4(0, 4), None);
+        let m_sub: Option<Matrix<3, 3>> = m.submatrix(4, 0);
+        assert_eq!(m_sub, None);
+        let m_sub: Option<Matrix<3, 3>> = m.submatrix(0, 4);
+        assert_eq!(m_sub, None);
+        let m_sub: Option<Matrix<2, 3>> = m.submatrix(0, 0);
+        assert_eq!(m_sub, None);
+        let m_sub: Option<Matrix<3, 2>> = m.submatrix(0, 0);
+        assert_eq!(m_sub, None);
+        let m_sub: Option<Matrix<3, 3>> = m.submatrix(2, 1);
         assert_eq!(
-            m.submatrix_4x4(2, 1),
+            m_sub,
             Some(Matrix::new_init([
                 [-6.0, 1.0, 6.0],
                 [-8.0, 8.0, 6.0],
                 [-7.0, -1.0, 1.0],
             ]))
         );
+        let m_sub: Option<Matrix<3, 3>> = m.submatrix(0, 3);
         assert_eq!(
-            m.submatrix_4x4(0, 3),
+            m_sub,
             Some(Matrix::new_init([
                 [-8.0, 5.0, 8.0],
                 [-1.0, 0.0, 8.0],
