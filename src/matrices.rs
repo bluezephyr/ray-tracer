@@ -27,6 +27,9 @@ pub struct Matrix<const R: usize, const C: usize> {
 
 pub trait Submatrix<Rhs = Self> {
     type Output;
+
+    // Specifiy the row and column to delete
+    // Note that the size of the output matrix must be R-1, C-1 for a RxC matrix.
     fn submatrix(self, row: usize, col: usize) -> Option<Self::Output>;
 }
 
@@ -120,6 +123,7 @@ impl<const R: usize, const C: usize, const P: usize, const Q: usize> Submatrix<&
     type Output = Matrix<P, Q>;
 
     fn submatrix(self, row: usize, col: usize) -> Option<Matrix<P, Q>> {
+        // Make sure that the input parameters and size of the output matrix are correct
         if row >= R || col >= C || R - 1 != P || C - 1 != Q {
             return None;
         }
