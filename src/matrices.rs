@@ -109,9 +109,24 @@ impl Mul<&Tuple> for &Matrix<4, 4> {
 
 // The determinant is simple to calculate for 2x2 matrices
 impl Matrix<2, 2> {
-    fn det(self) -> f64 {
+    fn det(&self) -> f64 {
         let d = self.data;
         return d[0][0] * d[1][1] - d[0][1] * d[1][0];
+    }
+}
+
+// The minor and cofactor functions are only implemented for 3x3 matrices for the moment
+impl Matrix<3, 3> {
+    fn minor(&self, row: usize, col: usize) -> f64 {
+        return self.submatrix(row, col).unwrap().det();
+    }
+
+    fn cofactor(&self, row: usize, col: usize) -> f64 {
+        let mut minor = self.minor(row, col);
+        if row + col % 2 != 0 {
+            minor = -minor;
+        }
+        return minor;
     }
 }
 
@@ -439,5 +454,28 @@ mod tests {
                 [-7.0, 1.0, -1.0],
             ]))
         );
+    }
+
+    #[test]
+    fn calculate_minor_of_a_3x3_matrix() {
+        let m = Matrix::new_init([
+            [3.0, 5.0, 0.0],   //
+            [2.0, -1.0, -7.0], //
+            [6.0, -1.0, 5.0],  //
+        ]);
+        assert_eq!(m.submatrix(1, 0).unwrap().det(), m.minor(1, 0));
+    }
+
+    #[test]
+    fn calculate_cofactor_for_3x3_matrix() {
+        let m = Matrix::new_init([
+            [3.0, 5.0, 0.0],   //
+            [2.0, -1.0, -7.0], //
+            [6.0, -1.0, 5.0],  //
+        ]);
+        assert_eq!(m.minor(0, 0), -12.0);
+        assert_eq!(m.cofactor(0, 0), -12.0);
+        assert_eq!(m.minor(1, 0), 25.0);
+        assert_eq!(m.cofactor(1, 0), -25.0);
     }
 }
