@@ -12,6 +12,9 @@ use std::ops::Mul;
 //       .    .          .
 //      am1  am2  ...   amn
 //
+//  For square matrices, R is used, e.g., Matrix<R, R>
+//  If more than one matrix is used, the notation for the second matrix is
+//
 //  Matrix B (P rows, Q columns)
 //      b11  b12  ...   b1q
 //      b21  b22  ...   b1q
@@ -64,6 +67,56 @@ impl<const R: usize> Matrix<R, R> {
         }
         return transposed;
     }
+
+    // The functions minor, cofactor and det (determinant) are only implemented
+    // for small, square matrices) - up to 4x4 matrices are supported.
+    fn minor(&self, row: usize, col: usize) -> Option<f64> {
+        match R {
+            2 => return self.det(),
+            3 => {
+                let m: Matrix<2, 2> = self.submatrix(row, col).unwrap();
+                return m.det();
+            }
+            4 => {
+                let m: Matrix<3, 3> = self.submatrix(row, col).unwrap();
+                return m.det();
+            }
+            _ => return None,
+        }
+    }
+
+    fn cofactor(&self, row: usize, col: usize) -> Option<f64> {
+        if R > 4 {
+            return None;
+        }
+
+        let mut min = self.minor(row, col).unwrap();
+        if row + col % 2 != 0 {
+            min = -min;
+        }
+
+        return Some(min);
+    }
+
+    fn det(&self) -> Option<f64> {
+        let data = self.data;
+        match R {
+            // The determinant for a 2x2 matrix is simple to calculate
+            2 => return Some(data[0][0] * data[1][1] - data[0][1] * data[1][0]),
+
+            // The determinant for a larger matrix is calculated by adding each item in
+            // one row (first row selected) multiplied by its cofactor. The operation
+            // uses the cofactor, minor, and det functions recursively.
+            3 | 4 => {
+                let mut det = 0.0;
+                for col in 0..R {
+                    det = det + data[0][col] * self.cofactor(0, col).unwrap();
+                }
+                return Some(det);
+            }
+            _ => return None,
+        }
+    }
 }
 
 impl<const R: usize, const C: usize> PartialEq for Matrix<R, C> {
@@ -104,29 +157,6 @@ impl Mul<&Tuple> for &Matrix<4, 4> {
 
     fn mul(self, t: &Tuple) -> Matrix<4, 1> {
         return self * &Matrix::<4, 1>::new_init([[t.x], [t.y], [t.z], [t.w]]);
-    }
-}
-
-// The determinant is simple to calculate for 2x2 matrices
-impl Matrix<2, 2> {
-    fn det(&self) -> f64 {
-        let d = self.data;
-        return d[0][0] * d[1][1] - d[0][1] * d[1][0];
-    }
-}
-
-// The minor and cofactor functions are only implemented for 3x3 matrices for the moment
-impl Matrix<3, 3> {
-    fn minor(&self, row: usize, col: usize) -> f64 {
-        return self.submatrix(row, col).unwrap().det();
-    }
-
-    fn cofactor(&self, row: usize, col: usize) -> f64 {
-        let mut minor = self.minor(row, col);
-        if row + col % 2 != 0 {
-            minor = -minor;
-        }
-        return minor;
     }
 }
 
@@ -379,15 +409,6 @@ mod tests {
     }
 
     #[test]
-    fn calculate_determinant_for_2x2_matrix() {
-        let m = Matrix::new_init([
-            [1.0, 5.0],  //
-            [-3.0, 2.0], //
-        ]);
-        assert!(m.det() == 17.0);
-    }
-
-    #[test]
     fn calculate_submatrix_for_3x3_matrix() {
         let m = Matrix::new_init([
             [1.0, 5.0, 0.0],  //
@@ -463,7 +484,8 @@ mod tests {
             [2.0, -1.0, -7.0], //
             [6.0, -1.0, 5.0],  //
         ]);
-        assert_eq!(m.submatrix(1, 0).unwrap().det(), m.minor(1, 0));
+        let sub: Matrix<2, 2> = m.submatrix(1, 0).unwrap();
+        assert_eq!(m.minor(1, 0), sub.det());
     }
 
     #[test]
@@ -473,9 +495,54 @@ mod tests {
             [2.0, -1.0, -7.0], //
             [6.0, -1.0, 5.0],  //
         ]);
-        assert_eq!(m.minor(0, 0), -12.0);
-        assert_eq!(m.cofactor(0, 0), -12.0);
-        assert_eq!(m.minor(1, 0), 25.0);
-        assert_eq!(m.cofactor(1, 0), -25.0);
+        assert_eq!(m.minor(0, 0), Some(-12.0));
+        assert_eq!(m.cofactor(0, 0), Some(-12.0));
+        assert_eq!(m.minor(1, 0), Some(25.0));
+        assert_eq!(m.cofactor(1, 0), Some(-25.0));
+    }
+
+    #[test]
+    fn calculate_determinant_for_2x2_matrix() {
+        let m = Matrix::new_init([
+            [1.0, 5.0],  //
+            [-3.0, 2.0], //
+        ]);
+        assert!(m.det() == Some(17.0));
+    }
+
+    #[test]
+    fn calculate_determinant_for_3x3_matrix() {
+        let m = Matrix::new_init([
+            [1.0, 2.0, 6.0],   //
+            [-5.0, 8.0, -4.0], //
+            [2.0, 6.0, 4.0],   //
+        ]);
+        assert_eq!(m.cofactor(0, 0), Some(56.0));
+        assert_eq!(m.cofactor(0, 1), Some(12.0));
+        assert_eq!(m.cofactor(0, 2), Some(-46.0));
+        assert_eq!(m.det(), Some(-196.0));
+    }
+
+    #[test]
+    fn calculate_determinant_for_4x4_matrix() {
+        let m = Matrix::new_init([
+            [-2.0, -8.0, 3.0, 5.0],
+            [-3.0, 1.0, 7.0, 3.0],
+            [1.0, 2.0, -9.0, 6.0],
+            [-6.0, 7.0, 7.0, -9.0],
+        ]);
+        assert_eq!(m.cofactor(0, 0), Some(690.0));
+        assert_eq!(m.cofactor(0, 1), Some(447.0));
+        assert_eq!(m.cofactor(0, 2), Some(210.0));
+        assert_eq!(m.cofactor(0, 3), Some(51.0));
+        assert_eq!(m.det(), Some(-4071.0));
+    }
+
+    #[test]
+    fn det_cofactor_and_minor_not_supported_for_larger_matrices() {
+        let m = Matrix::<5, 5>::new();
+        assert_eq!(m.cofactor(0, 0), None);
+        assert_eq!(m.minor(0, 0), None);
+        assert_eq!(m.det(), None);
     }
 }
