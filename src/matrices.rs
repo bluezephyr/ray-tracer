@@ -36,6 +36,8 @@ pub trait Submatrix<Rhs = Self> {
     fn submatrix(self, row: usize, col: usize) -> Option<Self::Output>;
 }
 
+const EPSILON: f64 = 0.00001;
+
 impl<const R: usize, const C: usize> Matrix<R, C> {
     fn new() -> Self {
         let data = [[0.0; C]; R];
@@ -68,8 +70,8 @@ impl<const R: usize> Matrix<R, R> {
         return transposed;
     }
 
-    // The functions minor, cofactor and det (determinant) are only implemented
-    // for small, square matrices) - up to 4x4 matrices are supported.
+    // The functions minor, cofactor, determinant (det), and inversion are only
+    // implemented for small, square matrices) - up to 4x4 matrices are supported.
     fn minor(&self, row: usize, col: usize) -> Option<f64> {
         match R {
             2 => return self.det(),
@@ -91,7 +93,7 @@ impl<const R: usize> Matrix<R, R> {
         }
 
         let mut min = self.minor(row, col).unwrap();
-        if row + col % 2 != 0 {
+        if (row + col) % 2 != 0 {
             min = -min;
         }
 
@@ -117,11 +119,39 @@ impl<const R: usize> Matrix<R, R> {
             _ => return None,
         }
     }
+
+    fn invert(&self) -> Option<Matrix<R, R>> {
+        if R > 4 {
+            return None;
+        }
+
+        let det = self.det().unwrap();
+        if det == 0.0 {
+            return None;
+        }
+
+        let mut m = Matrix::<R, R>::new();
+        for row in 0..R {
+            for col in 0..R {
+                let c = self.cofactor(row, col).unwrap();
+                m.data[col][row] = c / det;
+            }
+        }
+
+        return Some(m);
+    }
 }
 
 impl<const R: usize, const C: usize> PartialEq for Matrix<R, C> {
     fn eq(&self, other: &Self) -> bool {
-        return self.data == other.data;
+        for row in 0..R {
+            for col in 0..C {
+                if (self.data[row][col] - other.data[row][col]).abs() > EPSILON {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     fn ne(&self, other: &Self) -> bool {
@@ -539,10 +569,142 @@ mod tests {
     }
 
     #[test]
-    fn det_cofactor_and_minor_not_supported_for_larger_matrices() {
+    fn det_cofactor_minor_invert_not_supported_for_larger_matrices() {
         let m = Matrix::<5, 5>::new();
         assert_eq!(m.cofactor(0, 0), None);
         assert_eq!(m.minor(0, 0), None);
         assert_eq!(m.det(), None);
+        assert_eq!(m.invert(), None);
+    }
+
+    #[test]
+    fn matrix_with_det_0_is_not_invertible() {
+        let m = Matrix::new_init([
+            [-4.0, 2.0, -2.0, -3.0],
+            [9.0, 6.0, 2.0, 6.0],
+            [0.0, -5.0, 1.0, -5.0],
+            [0.0, 0.0, 0.0, 0.0],
+        ]);
+        assert_eq!(m.invert(), None);
+    }
+
+    #[test]
+    fn invert_4x4_matrix() {
+        let m = Matrix::new_init([
+            [-5.0, 2.0, 6.0, -8.0],
+            [1.0, -5.0, 1.0, 8.0],
+            [7.0, 7.0, -6.0, -7.0],
+            [1.0, -3.0, 7.0, 4.0],
+        ]);
+        let m_inv = m.invert().unwrap();
+        let m_inv_calc = Matrix::new_init([
+            [0.21805, 0.45113, 0.24060, -0.04511],
+            [-0.80827, -1.45677, -0.44361, 0.52068],
+            [-0.07895, -0.22368, -0.05263, 0.19737],
+            [-0.52256, -0.81391, -0.30075, 0.30639],
+        ]);
+        assert_eq!(m.det(), Some(532.0));
+        assert_eq!(m.cofactor(0, 0), Some(116.0));
+        assert_eq!(m.cofactor(0, 1), Some(-430.0));
+        assert_eq!(m.cofactor(0, 2), Some(-42.0));
+        assert_eq!(m.cofactor(0, 3), Some(-278.0));
+        assert_eq!(m.cofactor(1, 0), Some(240.0));
+        assert_eq!(m.cofactor(1, 1), Some(-775.0));
+        assert_eq!(m.cofactor(1, 2), Some(-119.0));
+        assert_eq!(m.cofactor(1, 3), Some(-433.0));
+        assert_eq!(m.cofactor(2, 0), Some(128.0));
+        assert_eq!(m.cofactor(2, 1), Some(-236.0));
+        assert_eq!(m.cofactor(2, 2), Some(-28.0));
+        assert_eq!(m.cofactor(2, 3), Some(-160.0));
+        assert_eq!(m.cofactor(3, 0), Some(-24.0));
+        assert_eq!(m.cofactor(3, 1), Some(277.0));
+        assert_eq!(m.cofactor(3, 2), Some(105.0));
+        assert_eq!(m.cofactor(3, 3), Some(163.0));
+        assert_eq!(m_inv.data[2][3], 105.0 / 532.0);
+        assert_eq!(m_inv.data[3][2], -160.0 / 532.0);
+        assert_eq!(m_inv, m_inv_calc);
+    }
+
+    #[test]
+    fn invert_4x4_matrix_2() {
+        let m = Matrix::new_init([
+            [8.0, -5.0, 9.0, 2.0],
+            [7.0, 5.0, 6.0, 1.0],
+            [-6.0, 0.0, 9.0, 6.0],
+            [-3.0, 0.0, -9.0, -4.0],
+        ]);
+        let m_inv = Matrix::new_init([
+            [-0.15385, -0.15385, -0.28205, -0.53846],
+            [-0.07692, 0.12308, 0.02564, 0.03077],
+            [0.35897, 0.35897, 0.43590, 0.92308],
+            [-0.69231, -0.69231, -0.76923, -1.92308],
+        ]);
+        assert_eq!(m.invert().unwrap(), m_inv);
+    }
+
+    #[test]
+    fn invert_4x4_matrix_3() {
+        let m = Matrix::new_init([
+            [9.0, 3.0, 0.0, 9.0],
+            [-5.0, -2.0, -6.0, -3.0],
+            [-4.0, 9.0, 6.0, 4.0],
+            [-7.0, 6.0, 6.0, 2.0],
+        ]);
+        let m_inv = Matrix::new_init([
+            [-0.04074, -0.07778, 0.14444, -0.22222],
+            [-0.07778, 0.03333, 0.36667, -0.33333],
+            [-0.02901, -0.14630, -0.10926, 0.12963],
+            [0.17778, 0.06667, -0.26667, 0.33333],
+        ]);
+        assert_eq!(m.invert().unwrap(), m_inv);
+    }
+
+    #[test]
+    fn multiply_matrix_product_with_its_inverse() {
+        let m_a = Matrix::new_init([
+            [3.0, -9.0, 7.0, 3.0],
+            [3.0, -8.0, 2.0, -9.0],
+            [-4.0, 4.0, 4.0, 1.0],
+            [-6.0, 5.0, -1.0, 1.0],
+        ]);
+        let m_b = Matrix::new_init([
+            [8.0, 2.0, 2.0, 2.0],
+            [3.0, -1.0, 7.0, 0.0],
+            [7.0, 0.0, 5.0, 4.0],
+            [6.0, -2.0, 0.0, 5.0],
+        ]);
+        let m_c = &m_a * &m_b;
+        assert_eq!(&m_c * &m_b.invert().unwrap(), m_a);
+    }
+
+    #[test]
+    fn invert_identity_matrix_returns_identity_matrix() {
+        let identity = Matrix::<4, 4>::new_identity();
+        assert_eq!(identity.invert().unwrap(), identity);
+    }
+
+    #[test]
+    fn multiply_matrix_with_its_inverse_returns_identity_matrix() {
+        let m = Matrix::new_init([
+            [3.0, -9.0, 7.0, 3.0],
+            [3.0, -8.0, 2.0, -9.0],
+            [-4.0, 4.0, 4.0, 1.0],
+            [-6.0, 5.0, -1.0, 1.0],
+        ]);
+        assert_eq!(&m * &m.invert().unwrap(), Matrix::<4, 4>::new_identity());
+    }
+
+    #[test]
+    fn inverted_transposed_matrix_equals_transposed_inverted_matrix() {
+        let m = Matrix::new_init([
+            [3.0, -9.0, 7.0, 3.0],
+            [3.0, -8.0, 2.0, -9.0],
+            [-4.0, 4.0, 4.0, 1.0],
+            [-6.0, 5.0, -1.0, 1.0],
+        ]);
+        assert_eq!(
+            m.transpose().invert().unwrap(),
+            m.invert().unwrap().transpose()
+        );
     }
 }
