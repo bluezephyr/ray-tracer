@@ -61,6 +61,10 @@ impl Matrix<4, 4> {
         ]);
     }
 
+    fn translate(&self, x: f64, y: f64, z: f64) -> Matrix<4, 4> {
+        return &Self::translation(x, y, z) * self;
+    }
+
     fn scaling(x: f64, y: f64, z: f64) -> Matrix<4, 4> {
         return Matrix::<4, 4>::new_init([
             [x, 0.0, 0.0, 0.0],
@@ -68,6 +72,10 @@ impl Matrix<4, 4> {
             [0.0, 0.0, z, 0.0],
             [0.0, 0.0, 0.0, 1.0],
         ]);
+    }
+
+    fn scale(&self, x: f64, y: f64, z: f64) -> Matrix<4, 4> {
+        return &Self::scaling(x, y, z) * self;
     }
 
     // Rotation around the x axis in radians
@@ -80,6 +88,10 @@ impl Matrix<4, 4> {
         ]);
     }
 
+    fn rotate_x(&self, r: f64) -> Matrix<4, 4> {
+        return &Self::rotation_x(r) * self;
+    }
+
     // Rotation around the y axis in radians
     fn rotation_y(r: f64) -> Matrix<4, 4> {
         return Matrix::<4, 4>::new_init([
@@ -88,6 +100,10 @@ impl Matrix<4, 4> {
             [-r.sin(), 0.0, r.cos(), 0.0],
             [0.0, 0.0, 0.0, 1.0],
         ]);
+    }
+
+    fn rotate_y(&self, r: f64) -> Matrix<4, 4> {
+        return &Self::rotation_y(r) * self;
     }
 
     // Rotation around the z axis in radians
@@ -100,6 +116,10 @@ impl Matrix<4, 4> {
         ]);
     }
 
+    fn rotate_z(&self, r: f64) -> Matrix<4, 4> {
+        return &Self::rotation_z(r) * self;
+    }
+
     fn shearing(xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Matrix<4, 4> {
         return Matrix::<4, 4>::new_init([
             [1.0, xy, xz, 0.0],
@@ -107,6 +127,10 @@ impl Matrix<4, 4> {
             [zx, zy, 1.0, 0.0],
             [0.0, 0.0, 0.0, 1.0],
         ]);
+    }
+
+    fn shear(&self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Matrix<4, 4> {
+        return &Self::shearing(xy, xz, yx, yz, zx, zy) * self;
     }
 }
 
@@ -938,6 +962,59 @@ mod tests {
         let b = Matrix::scaling(5.0, 5.0, 5.0);
         let c = Matrix::translation(10.0, 5.0, 7.0);
         let t = &(&c * &b) * &a;
+        assert_eq!(&t * &p, to_matrix(&Tuple::point(15.0, 0.0, 7.0)));
+    }
+
+    #[test]
+    fn translate_point() {
+        let identity = Matrix::<4, 4>::new_identity();
+        let transform = identity.translate(5.0, -3.0, 2.0);
+        let p = &transform * &Tuple::point(-3.0, 4.0, 5.0);
+        assert_eq!(p, to_matrix(&Tuple::point(2.0, 1.0, 7.0)));
+    }
+
+    #[test]
+    fn scale_point() {
+        let transform = Matrix::new_identity().scale(2.0, 3.0, 4.0);
+        let p = &transform * &Tuple::point(-4.0, 6.0, 8.0);
+        assert_eq!(p, to_matrix(&Tuple::point(-8.0, 18.0, 32.0)));
+    }
+
+    #[test]
+    fn rotate_point_around_x_axis() {
+        let full_quarter = Matrix::new_identity().rotate_x(f64::consts::PI / 2.0);
+        let p = &full_quarter * &Tuple::point(0.0, 1.0, 0.0);
+        assert_eq!(p, to_matrix(&Tuple::point(0.0, 0.0, 1.0)));
+    }
+
+    #[test]
+    fn rotate_point_around_y_axis() {
+        let full_quarter = Matrix::new_identity().rotate_y(f64::consts::PI / 2.0);
+        let p = &full_quarter * &Tuple::point(0.0, 0.0, 1.0);
+        assert_eq!(p, to_matrix(&Tuple::point(1.0, 0.0, 0.0)));
+    }
+
+    #[test]
+    fn rotate_point_around_z_axis() {
+        let full_quarter = Matrix::new_identity().rotate_z(f64::consts::PI / 2.0);
+        let p = &full_quarter * &Tuple::point(0.0, 1.0, 0.0);
+        assert_eq!(p, to_matrix(&Tuple::point(-1.0, 0.0, 0.0)));
+    }
+
+    #[test]
+    fn shear_x_in_proportion_to_y() {
+        let transform = Matrix::new_identity().shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let p = &transform * &Tuple::point(2.0, 3.0, 4.0);
+        assert_eq!(p, to_matrix(&Tuple::point(5.0, 3.0, 4.0)));
+    }
+
+    #[test]
+    fn chained_transformation_alternative_syntax() {
+        let p = Tuple::point(1.0, 0.0, 1.0);
+        let t = Matrix::new_identity()
+            .rotate_x(f64::consts::PI / 2.0)
+            .scale(5.0, 5.0, 5.0)
+            .translate(10.0, 5.0, 7.0);
         assert_eq!(&t * &p, to_matrix(&Tuple::point(15.0, 0.0, 7.0)));
     }
 }
