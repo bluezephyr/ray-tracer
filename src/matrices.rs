@@ -40,12 +40,12 @@ pub trait Submatrix<Rhs = Self> {
 const EPSILON: f64 = 0.00001;
 
 impl<const R: usize, const C: usize> Matrix<R, C> {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let data = [[0.0; C]; R];
         Matrix { data }
     }
 
-    fn new_init(data: [[f64; C]; R]) -> Self {
+    pub fn new_init(data: [[f64; C]; R]) -> Self {
         Matrix { data }
     }
 }
@@ -61,7 +61,7 @@ impl Matrix<4, 4> {
         ]);
     }
 
-    fn translate(&self, x: f64, y: f64, z: f64) -> Matrix<4, 4> {
+    pub fn translate(&self, x: f64, y: f64, z: f64) -> Matrix<4, 4> {
         return &Self::translation(x, y, z) * self;
     }
 
@@ -74,7 +74,7 @@ impl Matrix<4, 4> {
         ]);
     }
 
-    fn scale(&self, x: f64, y: f64, z: f64) -> Matrix<4, 4> {
+    pub fn scale(&self, x: f64, y: f64, z: f64) -> Matrix<4, 4> {
         return &Self::scaling(x, y, z) * self;
     }
 
@@ -88,7 +88,7 @@ impl Matrix<4, 4> {
         ]);
     }
 
-    fn rotate_x(&self, r: f64) -> Matrix<4, 4> {
+    pub fn rotate_x(&self, r: f64) -> Matrix<4, 4> {
         return &Self::rotation_x(r) * self;
     }
 
@@ -102,7 +102,7 @@ impl Matrix<4, 4> {
         ]);
     }
 
-    fn rotate_y(&self, r: f64) -> Matrix<4, 4> {
+    pub fn rotate_y(&self, r: f64) -> Matrix<4, 4> {
         return &Self::rotation_y(r) * self;
     }
 
@@ -116,7 +116,7 @@ impl Matrix<4, 4> {
         ]);
     }
 
-    fn rotate_z(&self, r: f64) -> Matrix<4, 4> {
+    pub fn rotate_z(&self, r: f64) -> Matrix<4, 4> {
         return &Self::rotation_z(r) * self;
     }
 
@@ -129,7 +129,7 @@ impl Matrix<4, 4> {
         ]);
     }
 
-    fn shear(&self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Matrix<4, 4> {
+    pub fn shear(&self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Matrix<4, 4> {
         return &Self::shearing(xy, xz, yx, yz, zx, zy) * self;
     }
 }
@@ -137,7 +137,7 @@ impl Matrix<4, 4> {
 // The methods below are only applicable on square matrices
 impl<const R: usize> Matrix<R, R> {
     // Create an identity Matrix
-    fn new_identity() -> Self {
+    pub fn new_identity() -> Self {
         let mut m = Matrix::new();
         for i in 0..R {
             m.data[i][i] = 1.0;
@@ -267,8 +267,17 @@ impl<const R: usize, const C: usize, const Q: usize> Mul<&Matrix<C, Q>> for &Mat
     }
 }
 
-fn to_matrix(tuple: &Tuple) -> Matrix<4, 1> {
+pub fn to_matrix(tuple: &Tuple) -> Matrix<4, 1> {
     return Matrix::<4, 1>::new_init([[tuple.x], [tuple.y], [tuple.z], [tuple.w]]);
+}
+
+pub fn to_tuple(matrix: &Matrix<4,1>) -> Tuple {
+    return Tuple {
+            x: matrix.data[0][0],
+            y: matrix.data[1][0],
+            z: matrix.data[2][0],
+            w: matrix.data[3][0],
+        };
 }
 
 impl Mul<&Tuple> for &Matrix<4, 4> {
