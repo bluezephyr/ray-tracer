@@ -1,11 +1,17 @@
 # Ray Tracer
 
-A simple Ray Tracer implemented in Rust, but no ray tracing yet..
+This repo contains a simple Ray Tracer implemented in Rust. The implementation
+is based on the book [*The Ray Tracer Challenge*](http://raytracerchallenge.com/)
+by Jamis Buck.
+
+[<img src="doc/bookcover.jpg" width="30%" height="30%" />](http://raytracerchallenge.com/)]
+
 
 ## Current status
 
-There are two commands available at the moment: 'trajectory' and 'clock'. Run
-the commands using
+No ray tracing yet, but there are two commands available at the moment that use
+the matrix operations and vector functions: *trajectory* and *clock*. Run the
+commands using
 
 `cargo run <command>`
 
