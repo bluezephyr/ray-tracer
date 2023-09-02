@@ -2,10 +2,12 @@ mod canvas;
 mod color;
 mod matrices;
 mod ppm;
+mod rays;
 mod tuple;
+mod shapes;
 
+use crate::canvas::{Canvas, Coordinate};
 use crate::color::Color;
-use canvas::{Canvas, Coordinate};
 use matrices::{to_tuple, Matrix};
 use ppm::Ppm;
 use std::{env, f64, process};
