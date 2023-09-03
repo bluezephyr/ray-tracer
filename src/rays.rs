@@ -8,8 +8,16 @@ pub struct Ray {
 }
 
 #[derive(Debug)]
-pub struct Intersection {
+pub struct Intersection<'a> {
     pub t: f64,
+    pub object: &'a Sphere,
+}
+
+// The referenced object must live at least as long as the intersection object
+impl<'a> Intersection<'a> {
+    fn new(t: f64, object: &'a Sphere) -> Intersection<'a> {
+        Intersection { t, object }
+    }
 }
 
 impl Ray {
@@ -24,7 +32,7 @@ impl Ray {
 
     // Find all points where the ray intersects the sphere.
     // Needs to be refactored when more shapes are added.
-    fn intersects(&self, sphere: &Sphere) -> Vec<Intersection> {
+    fn intersects<'a>(&self, sphere: &'a Sphere) -> Vec<Intersection<'a>> {
         let mut intersections = Vec::new();
         let sphere_to_ray = self.origin - Tuple::point(0.0, 0.0, 0.0);
         let a = dot(&self.direction, &self.direction);
@@ -34,9 +42,11 @@ impl Ray {
         if discriminant >= 0.0 {
             intersections.push(Intersection {
                 t: (-b - discriminant.sqrt()) / (2.0 * a),
+                object: sphere,
             });
             intersections.push(Intersection {
                 t: (-b + discriminant.sqrt()) / (2.0 * a),
+                object: sphere,
             });
         }
         return intersections;
@@ -46,6 +56,7 @@ impl Ray {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::ptr;
 
     #[test]
     fn create_and_query_a_ray() {
@@ -101,5 +112,13 @@ mod tests {
         assert_eq!(intersections.len(), 2);
         assert_eq!(intersections[0].t, -6.0);
         assert_eq!(intersections[1].t, -4.0);
+    }
+
+    #[test]
+    fn intersection_encapsulates_t_and_object() {
+        let s = Sphere::new_unit_sphere();
+        let i = Intersection::new(3.5, &s);
+        assert_eq!(i.t, 3.5);
+        assert!(ptr::eq(i.object, &s));
     }
 }
