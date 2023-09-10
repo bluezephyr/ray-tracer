@@ -1,5 +1,4 @@
 use std::ops::{Add, Mul, Sub};
-const EPSILON: f64 = 0.00001;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
@@ -12,12 +11,6 @@ pub struct ColorU8 {
     pub red: u8,
     pub green: u8,
     pub blue: u8,
-}
-
-pub fn approximate_eq(lhs: Color, rhs: Color) -> bool {
-    (lhs.red - rhs.red).abs() < EPSILON
-        && (lhs.red - rhs.red).abs() < EPSILON
-        && (lhs.red - rhs.red).abs() < EPSILON
 }
 
 fn normalize_u8_part(part: f64) -> u8 {
@@ -100,6 +93,13 @@ impl PartialEq for Color {
 #[cfg(test)]
 mod tests {
     use super::*;
+    const EPSILON: f64 = 0.00001;
+
+    pub fn approximate_eq(lhs: Color, rhs: Color) -> bool {
+        (lhs.red - rhs.red).abs() < EPSILON
+            && (lhs.red - rhs.red).abs() < EPSILON
+            && (lhs.red - rhs.red).abs() < EPSILON
+    }
 
     #[test]
     fn color_create() {

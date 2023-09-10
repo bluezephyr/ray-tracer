@@ -17,14 +17,6 @@ impl Tuple {
         return Tuple { x, y, z, w: 0.0 };
     }
 
-    pub(crate) fn is_point(&self) -> bool {
-        return self.w == 1.0;
-    }
-
-    pub(crate) fn is_vector(&self) -> bool {
-        return self.w == 0.0;
-    }
-
     pub(crate) fn magnitude(&self) -> f64 {
         (self.x.powf(2.0) + self.y.powf(2.0) + self.z.powf(2.0)).sqrt()
     }
@@ -129,6 +121,16 @@ pub fn cross(lhs: &Tuple, rhs: &Tuple) -> Tuple {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    impl Tuple {
+        pub(crate) fn is_point(&self) -> bool {
+            return self.w == 1.0;
+        }
+
+        pub(crate) fn is_vector(&self) -> bool {
+            return self.w == 0.0;
+        }
+    }
 
     #[test]
     fn tuple_with_w_1_0_is_a_point() {

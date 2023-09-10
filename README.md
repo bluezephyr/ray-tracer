@@ -6,21 +6,31 @@ by Jamis Buck.
 
 [<img src="doc/bookcover.jpg" width="30%" height="30%" />](http://raytracerchallenge.com/)]
 
-
 ## Current status
 
-No ray tracing yet, but there are two commands available at the moment that use
-the matrix operations and vector functions: *trajectory* and *clock*. Run the
-commands using
+There is currently no real ray tracing in place yet, but there are a few
+commands available that use the matrix operations and vector functions:
+*sphere*, *trajectory*, and *clock*. Run the commands using
 
 `cargo run <command>`
 
 The output for each command is a [PPM](https://en.wikipedia.org/wiki/Netpbm) image.
 The images can be viewed (on Linux) using, for example, the command `feh`. Use:
 
-`feh ball.ppm`
+`feh sphere.ppm`
 
-to show the 'ball.ppm' image.
+to show the 'sphere.ppm' image.
+
+### Sphere
+
+The first steps on the ray tracing are implemented under the `sphere` command.
+The command places a unit sphere at origo and a light source at `(0, 0, -5)`.
+The rays from the light source are traced towards a fictive wall positioned at
+z position 12. If a ray 'hits' the sphere on its way towards the wall, the
+corresponding pixel is painted purple. If not, the pixel is left as default
+(black). The output is an image called 'sphere.ppm'.
+
+![Sphere](doc/sphere.png)
 
 
 ### Clock

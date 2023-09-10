@@ -42,7 +42,7 @@ pub fn hit<'a>(intersections: &'a Vec<Intersection<'a>>) -> Option<&'a Intersect
 
 impl Ray {
     // origin is a point and direction is a vector
-    fn new(origin: Tuple, direction: Tuple) -> Ray {
+    pub fn new(origin: Tuple, direction: Tuple) -> Ray {
         Ray { origin, direction }
     }
 
@@ -52,7 +52,7 @@ impl Ray {
 
     // Find all points where the ray intersects the sphere.
     // Needs to be refactored when more shapes are added.
-    fn intersects<'a>(&self, sphere: &'a Sphere) -> Vec<Intersection<'a>> {
+    pub fn intersects<'a>(&self, sphere: &'a Sphere) -> Vec<Intersection<'a>> {
         let mut intersections = Vec::new();
         let ray = self.transform(&sphere.transformation.invert().unwrap());
 

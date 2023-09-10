@@ -3,11 +3,12 @@ mod color;
 mod matrices;
 mod ppm;
 mod rays;
-mod tuple;
 mod shapes;
+mod tuple;
 
 use crate::canvas::{Canvas, Coordinate};
 use crate::color::Color;
+use crate::rays::hit;
 use matrices::{to_tuple, Matrix};
 use ppm::Ppm;
 use std::{env, f64, process};
@@ -104,19 +105,63 @@ fn create_clock() {
     image.write_file();
 }
 
+fn generate_sphere(canvas: &mut Canvas) {
+    let ray_origin = Tuple::point(0.0, 0.0, -5.0);
+    let wall_z = 12.0;
+    let wall_size = 7.0; // Allow room for the projection and some extra space around
+    let pixel_size = wall_size / canvas.width as f64; // Assume the canvas is a square
+    let half = wall_size / 2.0;
+    let shadow = Color::color(0.4, 0.4, 0.7);
+    let shape = shapes::Sphere::new_unit_sphere();
+
+    // Iterate over all rows in the canvas
+    for y in 0..canvas.height - 1 {
+        // World y coordinates: top = +half, bottom = -half
+        let world_y = half - pixel_size * y as f64;
+        for x in 0..canvas.width - 1 {
+            let world_x = half - pixel_size * x as f64;
+
+            // Point on the wall that the ray targets
+            let wall_point = Tuple::point(world_x, world_y, wall_z);
+            let r = rays::Ray::new(ray_origin, wall_point);
+            let xs = r.intersects(&shape);
+
+            // If there is a hit, the sphere casts a 'shadow' on the wall
+            match hit(&xs) {
+                Some(_) => canvas.write_pixel(x, y, shadow),
+                None => (),
+            }
+        }
+    }
+}
+
+fn trace_sphere() {
+    println!("Primitive ray tracing of a sphere's 'shadow' on a wall. Please wait...");
+    let mut image = Ppm::new("sphere.ppm".to_string());
+    let mut canvas = Canvas::create(100, 100);
+    generate_sphere(&mut canvas);
+    image.add_canvas(canvas);
+    image.write_file();
+    println!("Image saved in file: sphere.ppm");
+}
+
 fn main() {
     println!("Welcome to the simple Ray Tracer!");
     let args: Vec<String> = env::args().collect();
 
     let config = Config::build(&args).unwrap_or_else(|err| {
         println!("Problem parsing arguments: {err}");
-        println!("Commands: 'trajectory' or 'clock'");
+        println!("Commands:");
+        println!("trajectory - Create an image of a ball trajectory");
+        println!("clock      - Create an simple clock case with a dot for each hour");
+        println!("sphere     - Primitive ray tracing of a sphere 'shadow' on a wall");
         process::exit(1);
     });
 
     match config.command.as_str() {
         "trajectory" => create_trajectory(),
         "clock" => create_clock(),
-        _ => println!("Unknown command"),
+        "sphere" => trace_sphere(),
+        _ => println!("Unknown command '{}'", config.command.as_str()),
     }
 }
