@@ -1,3 +1,4 @@
+use crate::matrices::{to_matrix, to_tuple, Matrix};
 use crate::shapes::Sphere;
 use crate::tuple::{dot, Tuple};
 
@@ -69,6 +70,13 @@ impl Ray {
             });
         }
         return intersections;
+    }
+
+    pub fn transform(&self, transformation: &Matrix<4, 4>) -> Ray {
+        Ray {
+            origin: to_tuple(&(transformation * &to_matrix(&self.origin))),
+            direction: to_tuple(&(transformation * &to_matrix(&self.direction))),
+        }
     }
 }
 
@@ -187,5 +195,23 @@ mod tests {
             hit(&intersections).unwrap(),
             &intersections[3] as *const Intersection
         ));
+    }
+
+    #[test]
+    fn translate_ray() {
+        let r = Ray::new(Tuple::point(1.0, 2.0, 3.0), Tuple::vector(0.0, 1.0, 0.0));
+        let t = Matrix::new_identity().translate(3.0, 4.0, 5.0);
+        let r2 = r.transform(&t);
+        assert_eq!(r2.origin, Tuple::point(4.0, 6.0, 8.0));
+        assert_eq!(r2.direction, Tuple::vector(0.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn scale_ray() {
+        let r = Ray::new(Tuple::point(1.0, 2.0, 3.0), Tuple::vector(0.0, 1.0, 0.0));
+        let t = Matrix::new_identity().scale(2.0, 3.0, 4.0);
+        let r2 = r.transform(&t);
+        assert_eq!(r2.origin, Tuple::point(2.0, 6.0, 12.0));
+        assert_eq!(r2.direction, Tuple::vector(0.0, 3.0, 0.0));
     }
 }
