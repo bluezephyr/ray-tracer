@@ -205,7 +205,7 @@ impl<const R: usize> Matrix<R, R> {
         }
     }
 
-    fn invert(&self) -> Option<Matrix<R, R>> {
+    pub fn invert(&self) -> Option<Matrix<R, R>> {
         if R > 4 {
             return None;
         }

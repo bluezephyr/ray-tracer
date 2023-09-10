@@ -54,9 +54,12 @@ impl Ray {
     // Needs to be refactored when more shapes are added.
     fn intersects<'a>(&self, sphere: &'a Sphere) -> Vec<Intersection<'a>> {
         let mut intersections = Vec::new();
-        let sphere_to_ray = self.origin - Tuple::point(0.0, 0.0, 0.0);
-        let a = dot(&self.direction, &self.direction);
-        let b = 2.0 * dot(&self.direction, &sphere_to_ray);
+        let ray = self.transform(&sphere.transformation.invert().unwrap());
+
+        // The vector from the sphere's center to the ray origin
+        let sphere_to_ray = ray.origin - Tuple::point(0.0, 0.0, 0.0);
+        let a = dot(&ray.direction, &ray.direction);
+        let b = 2.0 * dot(&ray.direction, &sphere_to_ray);
         let c = dot(&sphere_to_ray, &sphere_to_ray) - 1.0;
         let discriminant = b.powf(2.0) - 4.0 * a * c;
         if discriminant >= 0.0 {
@@ -213,5 +216,25 @@ mod tests {
         let r2 = r.transform(&t);
         assert_eq!(r2.origin, Tuple::point(2.0, 6.0, 12.0));
         assert_eq!(r2.direction, Tuple::vector(0.0, 3.0, 0.0));
+    }
+
+    #[test]
+    fn intersection_scaled_sphere_and_ray() {
+        let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
+        let mut s = Sphere::new_unit_sphere();
+        s.transformation = Matrix::new_identity().scale(2.0, 2.0, 2.0);
+        let intersections = r.intersects(&s);
+        assert_eq!(intersections.len(), 2);
+        assert_eq!(intersections[0].t, 3.0);
+        assert_eq!(intersections[1].t, 7.0);
+    }
+
+    #[test]
+    fn intersection_translated_sphere_and_ray() {
+        let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
+        let mut s = Sphere::new_unit_sphere();
+        s.transformation = Matrix::new_identity().translate(5.0, 0.0, 0.0);
+        let intersections = r.intersects(&s);
+        assert_eq!(intersections.len(), 0);
     }
 }
