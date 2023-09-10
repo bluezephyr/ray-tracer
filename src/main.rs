@@ -114,6 +114,9 @@ fn generate_sphere(canvas: &mut Canvas) {
     let shadow = Color::color(0.4, 0.4, 0.7);
     let shape = shapes::Sphere::new_unit_sphere();
 
+    // Uncomment to use transformations
+    // shape.transformation = Matrix::new_identity().shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0).rotate_z(f64::consts::PI / 6.0);
+
     // Iterate over all rows in the canvas
     for y in 0..canvas.height - 1 {
         // World y coordinates: top = +half, bottom = -half
@@ -138,7 +141,7 @@ fn generate_sphere(canvas: &mut Canvas) {
 fn trace_sphere() {
     println!("Primitive ray tracing of a sphere's 'shadow' on a wall. Please wait...");
     let mut image = Ppm::new("sphere.ppm".to_string());
-    let mut canvas = Canvas::create(100, 100);
+    let mut canvas = Canvas::create(300, 300);
     generate_sphere(&mut canvas);
     image.add_canvas(canvas);
     image.write_file();
