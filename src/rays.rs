@@ -20,6 +20,25 @@ impl<'a> Intersection<'a> {
     }
 }
 
+// Return a reference to the intersection with the lowest non-negative t value
+pub fn hit<'a>(intersections: &'a Vec<Intersection<'a>>) -> Option<&'a Intersection<'a>> {
+    if intersections.is_empty() {
+        None
+    } else {
+        let mut min_t = None;
+        for intersection in intersections {
+            if intersection.t >= 0.0 {
+                if min_t.is_none() {
+                    min_t = Some(intersection);
+                } else if intersection.t < min_t.unwrap().t {
+                    min_t = Some(intersection);
+                }
+            }
+        }
+        min_t
+    }
+}
+
 impl Ray {
     // origin is a point and direction is a vector
     fn new(origin: Tuple, direction: Tuple) -> Ray {
@@ -120,5 +139,53 @@ mod tests {
         let i = Intersection::new(3.5, &s);
         assert_eq!(i.t, 3.5);
         assert!(ptr::eq(i.object, &s));
+    }
+
+    #[test]
+    fn intersect_registers_object_at_intersection() {
+        let r = Ray::new(Tuple::point(0.0, 0.0, 5.0), Tuple::vector(0.0, 0.0, 1.0));
+        let s = Sphere::new_unit_sphere();
+        let intersections = r.intersects(&s);
+        assert_eq!(intersections.len(), 2);
+        assert!(ptr::eq(intersections[0].object, &s));
+        assert!(ptr::eq(intersections[1].object, &s));
+    }
+
+    #[test]
+    fn no_hit_when_all_intersections_negative() {
+        let s = Sphere::new_unit_sphere();
+        let intersections = vec![Intersection::new(-2.0, &s), Intersection::new(-1.0, &s)];
+        assert!(hit(&intersections).is_none());
+    }
+
+    #[test]
+    fn get_hit_when_all_intersections_positive() {
+        let s = Sphere::new_unit_sphere();
+        let intersections = vec![Intersection::new(1.0, &s), Intersection::new(2.0, &s)];
+        let i = hit(&intersections).unwrap();
+        assert!(ptr::eq(i, &intersections[0] as *const Intersection));
+    }
+
+    #[test]
+    fn get_hit_when_some_intersections_negative() {
+        let s = Sphere::new_unit_sphere();
+        let intersections = vec![Intersection::new(-1.0, &s), Intersection::new(2.0, &s)];
+        let i = hit(&intersections).unwrap();
+        assert!(ptr::eq(i, &intersections[1] as *const Intersection));
+    }
+
+    #[test]
+    fn hit_intersection_with_lowest_positive_t() {
+        let s = Sphere::new_unit_sphere();
+        let intersections = vec![
+            Intersection::new(5.0, &s),
+            Intersection::new(7.0, &s),
+            Intersection::new(-3.0, &s),
+            Intersection::new(2.0, &s),
+        ];
+        assert!(ptr::eq(
+            hit(&intersections).unwrap(),
+            &intersections[3] as *const Intersection
+        ));
     }
 }
