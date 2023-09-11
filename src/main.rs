@@ -62,8 +62,8 @@ fn print_trajectory(canvas: &mut Canvas, projectile: &mut Projectile, environmen
 }
 
 fn create_trajectory() {
-    println!("Creating a trajectory image: ball.ppm");
-    let mut ball = Projectile {
+    println!("Creating a trajectory image: trajectory.ppm");
+    let mut projectile = Projectile {
         position: Tuple::point(0.0, 1.0, 0.0),
         velocity: Tuple::vector(1.0, 1.8, 0.0).normalize() * 11.25,
     };
@@ -73,9 +73,9 @@ fn create_trajectory() {
         wind: Tuple::vector(-0.01, 0.0, 0.0),
     };
 
-    let mut image = Ppm::new("ball.ppm".to_string());
+    let mut image = Ppm::new("trajectory.ppm".to_string());
     let mut canvas = Canvas::create(900, 550);
-    print_trajectory(&mut canvas, &mut ball, garden);
+    print_trajectory(&mut canvas, &mut projectile, garden);
     image.add_canvas(canvas);
     image.write_file();
 }
@@ -105,7 +105,7 @@ fn create_clock() {
     image.write_file();
 }
 
-fn generate_sphere(canvas: &mut Canvas) {
+fn generate_sphere_shadow(canvas: &mut Canvas) {
     let ray_origin = Tuple::point(0.0, 0.0, -5.0);
     let wall_z = 12.0;
     let wall_size = 7.0; // Allow room for the projection and some extra space around
@@ -138,14 +138,14 @@ fn generate_sphere(canvas: &mut Canvas) {
     }
 }
 
-fn trace_sphere() {
+fn trace_shadow() {
     println!("Primitive ray tracing of a sphere's 'shadow' on a wall. Please wait...");
-    let mut image = Ppm::new("sphere.ppm".to_string());
+    let mut image = Ppm::new("shadow.ppm".to_string());
     let mut canvas = Canvas::create(300, 300);
-    generate_sphere(&mut canvas);
+    generate_sphere_shadow(&mut canvas);
     image.add_canvas(canvas);
     image.write_file();
-    println!("Image saved in file: sphere.ppm");
+    println!("Image saved in file: shadow.ppm");
 }
 
 fn main() {
@@ -155,16 +155,16 @@ fn main() {
     let config = Config::build(&args).unwrap_or_else(|err| {
         println!("Problem parsing arguments: {err}");
         println!("Commands:");
-        println!("trajectory - Create an image of a ball trajectory");
+        println!("trajectory - Create an image of a projectile's trajectory");
         println!("clock      - Create an simple clock case with a dot for each hour");
-        println!("sphere     - Primitive ray tracing of a sphere 'shadow' on a wall");
+        println!("shadow     - Primitive ray tracing of a sphere's 'shadow' on a wall");
         process::exit(1);
     });
 
     match config.command.as_str() {
         "trajectory" => create_trajectory(),
         "clock" => create_clock(),
-        "sphere" => trace_sphere(),
+        "shadow" => trace_shadow(),
         _ => println!("Unknown command '{}'", config.command.as_str()),
     }
 }
