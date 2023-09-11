@@ -145,7 +145,7 @@ impl<const R: usize> Matrix<R, R> {
         return m;
     }
 
-    fn transpose(&self) -> Self {
+    pub fn transpose(&self) -> Self {
         let mut transposed = Matrix::new_init(self.data);
         for row in 0..R {
             for col in 0..R {
