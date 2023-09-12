@@ -54,7 +54,7 @@ called. The image depicts a trajectory of a projectile that is sent away from
 position (0, 1) with a speed defined by the normalized vector (1, 1.8, 0) in an
 environment with gravity of -0.1 and a head wind of -0.01.
 
-![Projectile trajectory](doc/projectile.png)
+![Trajectory trajectory](doc/trajectory.png)
 
 ## Unit tests
 
