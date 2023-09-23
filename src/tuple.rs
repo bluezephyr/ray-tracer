@@ -118,9 +118,21 @@ pub fn cross(lhs: &Tuple, rhs: &Tuple) -> Tuple {
     );
 }
 
+pub fn reflect(vector: &Tuple, normal: &Tuple) -> Tuple {
+    return vector.sub(*normal * 2.0 * dot(vector, normal));
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    const EPSILON: f64 = 0.00001;
+
+    pub(crate) fn approx_eq(lhs: Tuple, rhs: Tuple, epsilon: f64) -> bool {
+        (lhs.x - rhs.x).abs() < epsilon
+            && (lhs.y - rhs.y).abs() < epsilon
+            && (lhs.z - rhs.z).abs() < epsilon
+            && (lhs.w - rhs.w).abs() < epsilon
+    }
 
     impl Tuple {
         pub(crate) fn is_point(&self) -> bool {
@@ -363,5 +375,27 @@ mod tests {
     #[test]
     fn inifinity() {
         let _inf = f64::INFINITY;
+    }
+
+    #[test]
+    fn reflect_vector_at_45_deg() {
+        let v = Tuple::vector(1.0, -1.0, 0.0);
+        let normal = Tuple::vector(0.0, 1.0, 0.0);
+        assert!(approx_eq(
+            reflect(&v, &normal),
+            Tuple::vector(1.0, 1.0, 0.0),
+            EPSILON
+        ));
+    }
+
+    #[test]
+    fn reflect_vector_off_slanted_surface() {
+        let v = Tuple::vector(0.0, -1.0, 0.0);
+        let normal = Tuple::vector(2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0, 0.0);
+        assert!(approx_eq(
+            reflect(&v, &normal),
+            Tuple::vector(1.0, 0.0, 0.0),
+            EPSILON
+        ));
     }
 }
