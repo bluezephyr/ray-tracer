@@ -20,11 +20,11 @@ impl PointLight {
 // Lighting calculates the combination of the ambient, diffuse, and specular reflection for a point
 // at a material that is affected by a light and observed at a specified location.
 pub fn lighting(
-    material: Material,
-    light: PointLight,
-    point: Tuple,
-    eye_vector: Tuple,
-    normal: Tuple,
+    material: &Material,
+    light: &PointLight,
+    point: &Tuple,
+    eye_vector: &Tuple,
+    normal: &Tuple,
 ) -> Color {
     let mut diffuse = Color::color(0.0, 0.0, 0.0);
     let mut specular = Color::color(0.0, 0.0, 0.0);
@@ -35,7 +35,7 @@ pub fn lighting(
     // The ambient contribution depend only on the material and the light
     let ambient = effective_color * material.ambient;
 
-    let light_vector = (light.position - point).normalize();
+    let light_vector = (light.position - *point).normalize();
     let light_dot_normal = dot(&light_vector, &normal);
 
     if light_dot_normal > 0.0 {
@@ -87,7 +87,7 @@ mod tests {
         let normal = Tuple::point(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::color(1.0, 1.0, 1.0));
         assert_eq!(
-            lighting(m, light, position, eyev, normal),
+            lighting(&m, &light, &position, &eyev, &normal),
             Color::color(1.9, 1.9, 1.9)
         );
     }
@@ -100,7 +100,7 @@ mod tests {
         let normal = Tuple::point(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::color(1.0, 1.0, 1.0));
         assert_eq!(
-            lighting(m, light, position, eyev, normal),
+            lighting(&m, &light, &position, &eyev, &normal),
             Color::color(1.0, 1.0, 1.0)
         );
     }
@@ -113,7 +113,7 @@ mod tests {
         let normal = Tuple::point(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::color(1.0, 1.0, 1.0));
         assert!(approx_eq(
-            lighting(m, light, position, eyev, normal),
+            lighting(&m, &light, &position, &eyev, &normal),
             Color::color(0.7364, 0.7364, 0.7364)
         ));
     }
@@ -126,7 +126,7 @@ mod tests {
         let normal = Tuple::point(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::color(1.0, 1.0, 1.0));
         assert!(approx_eq(
-            lighting(m, light, position, eyev, normal),
+            lighting(&m, &light, &position, &eyev, &normal),
             Color::color(1.6364, 1.6364, 1.6364)
         ));
     }
@@ -139,7 +139,7 @@ mod tests {
         let normal = Tuple::point(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 0.0, 10.0), Color::color(1.0, 1.0, 1.0));
         assert!(approx_eq(
-            lighting(m, light, position, eyev, normal),
+            lighting(&m, &light, &position, &eyev, &normal),
             Color::color(0.1, 0.1, 0.1)
         ));
     }

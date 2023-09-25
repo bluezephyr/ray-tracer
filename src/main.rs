@@ -1,15 +1,17 @@
 mod canvas;
 mod color;
+mod lights;
 mod matrices;
 mod ppm;
 mod rays;
 mod shapes;
 mod tuple;
-mod lights;
 
 use crate::canvas::{Canvas, Coordinate};
 use crate::color::Color;
+use crate::lights::{lighting, PointLight};
 use crate::rays::hit;
+use crate::shapes::{Normal, Sphere};
 use matrices::{to_tuple, Matrix};
 use ppm::Ppm;
 use std::{env, f64, process};
@@ -149,6 +151,58 @@ fn trace_shadow() {
     println!("Image saved in file: shadow.ppm");
 }
 
+fn generate_phong_reflection(canvas: &mut Canvas) {
+    let ray_origin = Tuple::point(0.0, 0.0, -5.0);
+    let wall_z = 12.0;
+    let wall_size = 7.0; // Allow room for the projection and some extra space around
+    let pixel_size = wall_size / canvas.width as f64; // Assume the canvas is a square
+    let half = wall_size / 2.0;
+    let mut shape = Sphere::new_unit_sphere();
+    shape.material.color = Color::color(0.0, 0.5, 1.0);
+    let light = PointLight::new(
+        Tuple::point(-10.0, 10.0, -10.0),
+        Color::color(1.0, 1.0, 1.0),
+    );
+
+    // Uncomment to use transformations
+    // shape.transformation = Matrix::new_identity().shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0).rotate_z(f64::consts::PI / 6.0);
+
+    // Iterate over all rows in the canvas
+    for y in 0..canvas.height - 1 {
+        // World y coordinates: top = +half, bottom = -half
+        let world_y = half - pixel_size * y as f64;
+        for x in 0..canvas.width - 1 {
+            let world_x = -half + pixel_size * x as f64;
+
+            // Point on the wall that the ray targets
+            let wall_point = Tuple::point(world_x, world_y, wall_z);
+            let r = rays::Ray::new(ray_origin, wall_point);
+            let xs = r.intersects(&shape);
+
+            match hit(&xs) {
+                Some(xs) => {
+                    let point = r.position(xs.t);
+                    let normal = xs.object.normal_at(&point);
+                    let eyev = -r.direction.normalize();
+                    let color = lighting(&xs.object.material, &light, &point, &eyev, &normal);
+                    canvas.write_pixel(x, y, color);
+                }
+                None => (),
+            }
+        }
+    }
+}
+
+fn phong_reflection() {
+    println!("Ray tracing using the Phong reflection model. Please wait...");
+    let mut image = Ppm::new("sphere.ppm".to_string());
+    let mut canvas = Canvas::create(300, 300);
+    generate_phong_reflection(&mut canvas);
+    image.add_canvas(canvas);
+    image.write_file();
+    println!("Image saved in file: sphere.ppm");
+}
+
 fn main() {
     println!("Welcome to the simple Ray Tracer!");
     let args: Vec<String> = env::args().collect();
@@ -159,6 +213,7 @@ fn main() {
         println!("trajectory - Create an image of a projectile's trajectory");
         println!("clock      - Create an simple clock case with a dot for each hour");
         println!("shadow     - Primitive ray tracing of a sphere's 'shadow' on a wall");
+        println!("lights     - First ray tracing using Phong reflection model");
         process::exit(1);
     });
 
@@ -166,6 +221,7 @@ fn main() {
         "trajectory" => create_trajectory(),
         "clock" => create_clock(),
         "shadow" => trace_shadow(),
+        "lights" => phong_reflection(),
         _ => println!("Unknown command '{}'", config.command.as_str()),
     }
 }
