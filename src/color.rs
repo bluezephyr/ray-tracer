@@ -97,8 +97,8 @@ mod tests {
 
     pub fn approximate_eq(lhs: Color, rhs: Color) -> bool {
         (lhs.red - rhs.red).abs() < EPSILON
-            && (lhs.red - rhs.red).abs() < EPSILON
-            && (lhs.red - rhs.red).abs() < EPSILON
+            && (lhs.green - rhs.green).abs() < EPSILON
+            && (lhs.blue - rhs.blue).abs() < EPSILON
     }
 
     #[test]

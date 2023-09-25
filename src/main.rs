@@ -5,6 +5,7 @@ mod ppm;
 mod rays;
 mod shapes;
 mod tuple;
+mod lights;
 
 use crate::canvas::{Canvas, Coordinate};
 use crate::color::Color;

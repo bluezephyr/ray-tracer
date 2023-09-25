@@ -1,3 +1,4 @@
+use crate::color::Color;
 use crate::matrices::{to_matrix, to_tuple, Matrix};
 use crate::tuple::Tuple;
 
@@ -5,11 +6,33 @@ pub trait Normal {
     fn normal_at(&self, point: &Tuple) -> Tuple;
 }
 
+#[derive(Debug, PartialEq)]
+pub struct Material {
+    pub color: Color,
+    pub ambient: f64,
+    pub diffuse: f64,
+    pub specular: f64,
+    pub shininess: f64,
+}
+
+impl Material {
+    pub fn new() -> Material {
+        Material {
+            color: Color::color(1.0, 1.0, 1.0),
+            ambient: 0.1,
+            diffuse: 0.9,
+            specular: 0.9,
+            shininess: 200.0,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Sphere {
     pub pos: Tuple,
     pub radius: f64,
     pub transformation: Matrix<4, 4>,
+    pub material: Material,
 }
 
 impl Sphere {
@@ -18,6 +41,7 @@ impl Sphere {
             pos: Tuple::point(0.0, 0.0, 0.0),
             radius: 1.0,
             transformation: Matrix::<4, 4>::new_identity(),
+            material: Material::new(),
         }
     }
 }
@@ -127,5 +151,31 @@ mod tests {
             Tuple::vector(0.0, 0.97014, -0.24254),
             EPSILON
         ));
+    }
+
+    #[test]
+    fn default_material() {
+        let m = Material::new();
+        assert_eq!(m.color, Color::color(1.0, 1.0, 1.0));
+        assert_eq!(m.ambient, 0.1);
+        assert_eq!(m.diffuse, 0.9);
+        assert_eq!(m.specular, 0.9);
+        assert_eq!(m.shininess, 200.0);
+    }
+
+    #[test]
+    fn sphere_has_default_material() {
+        let s = Sphere::new_unit_sphere();
+        let m = Material::new();
+        assert_eq!(s.material, m);
+    }
+
+    #[test]
+    fn sphere_can_be_assigned_material() {
+        let mut s = Sphere::new_unit_sphere();
+        let mut m = Material::new();
+        m.ambient = 1.0;
+        s.material = m;
+        assert_eq!(s.material.ambient, 1.0);
     }
 }
