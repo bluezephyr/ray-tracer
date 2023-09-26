@@ -213,7 +213,7 @@ fn main() {
         println!("trajectory - Create an image of a projectile's trajectory");
         println!("clock      - Create an simple clock case with a dot for each hour");
         println!("shadow     - Primitive ray tracing of a sphere's 'shadow' on a wall");
-        println!("lights     - First ray tracing using Phong reflection model");
+        println!("sphere     - First ray tracing using Phong reflection model");
         process::exit(1);
     });
 
@@ -221,7 +221,7 @@ fn main() {
         "trajectory" => create_trajectory(),
         "clock" => create_clock(),
         "shadow" => trace_shadow(),
-        "lights" => phong_reflection(),
+        "sphere" => phong_reflection(),
         _ => println!("Unknown command '{}'", config.command.as_str()),
     }
 }

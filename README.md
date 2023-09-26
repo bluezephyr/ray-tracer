@@ -8,9 +8,10 @@ by Jamis Buck.
 
 ## Current status
 
-There is currently no real ray tracing in place yet, but there are a few
-commands available that use the matrix operations and vector functions:
-*shadow*, *trajectory*, and *clock*. Run the commands using
+The ray tracer provides a few commands to generate images using matrix
+operations, vector functions and so on to calculate how pixels on a canvas
+shall be colored. The current available commands are: *sphere*, *shadow*,
+*trajectory*, and *clock*. Run the commands using
 
 `cargo run <command>`
 
@@ -20,6 +21,19 @@ The images can be viewed (on Linux) using, for example, the command `feh`. Use:
 `feh shadow.ppm`
 
 to show the 'shadow.ppm' image.
+
+### Sphere
+
+The `sphere` command uses the [Phong reflection
+model](https://en.wikipedia.org/wiki/Phong_reflection_model) to simulate the
+reflection of light off an object; in this case a sphere. In the simulation, a
+light source is located at `(-10, 10, -10)` and its light is reflected off a
+blue sphere at origo with the radius of 1. The reflections are captured on a
+canvas at z position 12. The Phong reflection modeul is used to calculate the
+colors of the pixels at the canvas.
+
+![Sphere](doc/sphere.png)
+
 
 ### Shadow
 
