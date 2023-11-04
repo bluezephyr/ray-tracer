@@ -116,7 +116,7 @@ fn generate_sphere_shadow(canvas: &mut Canvas) {
     let pixel_size = wall_size / canvas.width as f64; // Assume the canvas is a square
     let half = wall_size / 2.0;
     let shadow = Color::color(0.4, 0.4, 0.7);
-    let shape = shapes::Sphere::new_unit_sphere();
+    let shape = shapes::Sphere::new();
 
     // Uncomment to use transformations
     // shape.transformation = Matrix::new_identity().shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0).rotate_z(f64::consts::PI / 6.0);
@@ -158,7 +158,7 @@ fn generate_phong_reflection(canvas: &mut Canvas) {
     let wall_size = 7.0; // Allow room for the projection and some extra space around
     let pixel_size = wall_size / canvas.width as f64; // Assume the canvas is a square
     let half = wall_size / 2.0;
-    let mut shape = Sphere::new_unit_sphere();
+    let mut shape = Sphere::new();
     shape.material.color = Color::color(0.0, 0.5, 1.0);
     let light = PointLight::new(
         Tuple::point(-10.0, 10.0, -10.0),

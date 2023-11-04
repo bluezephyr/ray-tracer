@@ -27,7 +27,7 @@ impl Material {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Sphere {
     pub pos: Tuple,
     pub radius: f64,
@@ -36,7 +36,7 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new_unit_sphere() -> Sphere {
+    pub fn new() -> Sphere {
         Sphere {
             pos: Tuple::point(0.0, 0.0, 0.0),
             radius: 1.0,
@@ -71,13 +71,13 @@ mod tests {
 
     #[test]
     fn identity_matrix_default_transformation_for_sphere() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         assert_eq!(s.transformation, Matrix::<4, 4>::new_identity());
     }
 
     #[test]
     fn change_transformation_for_sphere() {
-        let mut s = Sphere::new_unit_sphere();
+        let mut s = Sphere::new();
         s.transformation = Matrix::new_identity().translate(2.0, 3.0, 4.0);
         assert_eq!(
             s.transformation,
@@ -87,7 +87,7 @@ mod tests {
 
     #[test]
     fn normal_on_sphere_at_x_axis() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         assert!(approx_eq(
             s.normal_at(&Tuple::point(1.0, 0.0, 0.0)),
             Tuple::vector(1.0, 0.0, 0.0),
@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     fn normal_on_sphere_at_y_axis() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         assert!(approx_eq(
             s.normal_at(&Tuple::point(0.0, 1.0, 0.0)),
             Tuple::vector(0.0, 1.0, 0.0),
@@ -107,7 +107,7 @@ mod tests {
 
     #[test]
     fn normal_on_sphere_at_z_axis() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         assert!(approx_eq(
             s.normal_at(&Tuple::point(0.0, 0.0, 1.0)),
             Tuple::vector(0.0, 0.0, 1.0),
@@ -117,7 +117,7 @@ mod tests {
 
     #[test]
     fn normal_on_sphere_at_non_axial_point() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         assert!(approx_eq(
             s.normal_at(&Tuple::point(
                 3_f64.sqrt() / 3.0,
@@ -131,7 +131,7 @@ mod tests {
 
     #[test]
     fn normal_on_translated_sphere() {
-        let mut s = Sphere::new_unit_sphere();
+        let mut s = Sphere::new();
         s.transformation = Matrix::new_identity().translate(0.0, 1.0, 0.0);
         assert!(approx_eq(
             s.normal_at(&Tuple::point(0.0, 1.70711, -0.70711)),
@@ -142,7 +142,7 @@ mod tests {
 
     #[test]
     fn normal_on_transformed_sphere() {
-        let mut s = Sphere::new_unit_sphere();
+        let mut s = Sphere::new();
         s.transformation = Matrix::new_identity()
             .rotate_z(std::f64::consts::PI / 5.0)
             .scale(1.0, 0.5, 1.0);
@@ -165,14 +165,14 @@ mod tests {
 
     #[test]
     fn sphere_has_default_material() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let m = Material::new();
         assert_eq!(s.material, m);
     }
 
     #[test]
     fn sphere_can_be_assigned_material() {
-        let mut s = Sphere::new_unit_sphere();
+        let mut s = Sphere::new();
         let mut m = Material::new();
         m.ambient = 1.0;
         s.material = m;

@@ -109,7 +109,7 @@ mod tests {
     #[test]
     fn ray_intersects_sphere_at_two_points() {
         let r = Ray::new(Tuple::point(0.0, 1.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let intersections = r.intersects(&s);
         assert_eq!(intersections.len(), 2);
         assert_eq!(intersections[0].t, 5.0);
@@ -119,7 +119,7 @@ mod tests {
     #[test]
     fn ray_misses_sphere() {
         let r = Ray::new(Tuple::point(0.0, 2.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let intersections = r.intersects(&s);
         assert_eq!(intersections.len(), 0);
     }
@@ -127,7 +127,7 @@ mod tests {
     #[test]
     fn ray_originates_within_sphere() {
         let r = Ray::new(Tuple::point(0.0, 0.0, 0.0), Tuple::vector(0.0, 0.0, 1.0));
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let intersections = r.intersects(&s);
         assert_eq!(intersections.len(), 2);
         assert_eq!(intersections[0].t, -1.0);
@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn sphere_is_behind_a_ray() {
         let r = Ray::new(Tuple::point(0.0, 0.0, 5.0), Tuple::vector(0.0, 0.0, 1.0));
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let intersections = r.intersects(&s);
         assert_eq!(intersections.len(), 2);
         assert_eq!(intersections[0].t, -6.0);
@@ -146,7 +146,7 @@ mod tests {
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let i = Intersection::new(3.5, &s);
         assert_eq!(i.t, 3.5);
         assert!(ptr::eq(i.object, &s));
@@ -155,7 +155,7 @@ mod tests {
     #[test]
     fn intersect_registers_object_at_intersection() {
         let r = Ray::new(Tuple::point(0.0, 0.0, 5.0), Tuple::vector(0.0, 0.0, 1.0));
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let intersections = r.intersects(&s);
         assert_eq!(intersections.len(), 2);
         assert!(ptr::eq(intersections[0].object, &s));
@@ -164,14 +164,14 @@ mod tests {
 
     #[test]
     fn no_hit_when_all_intersections_negative() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let intersections = vec![Intersection::new(-2.0, &s), Intersection::new(-1.0, &s)];
         assert!(hit(&intersections).is_none());
     }
 
     #[test]
     fn get_hit_when_all_intersections_positive() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let intersections = vec![Intersection::new(1.0, &s), Intersection::new(2.0, &s)];
         let i = hit(&intersections).unwrap();
         assert!(ptr::eq(i, &intersections[0] as *const Intersection));
@@ -179,7 +179,7 @@ mod tests {
 
     #[test]
     fn get_hit_when_some_intersections_negative() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let intersections = vec![Intersection::new(-1.0, &s), Intersection::new(2.0, &s)];
         let i = hit(&intersections).unwrap();
         assert!(ptr::eq(i, &intersections[1] as *const Intersection));
@@ -187,7 +187,7 @@ mod tests {
 
     #[test]
     fn hit_intersection_with_lowest_positive_t() {
-        let s = Sphere::new_unit_sphere();
+        let s = Sphere::new();
         let intersections = vec![
             Intersection::new(5.0, &s),
             Intersection::new(7.0, &s),
@@ -221,7 +221,7 @@ mod tests {
     #[test]
     fn intersection_scaled_sphere_and_ray() {
         let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
-        let mut s = Sphere::new_unit_sphere();
+        let mut s = Sphere::new();
         s.transformation = Matrix::new_identity().scale(2.0, 2.0, 2.0);
         let intersections = r.intersects(&s);
         assert_eq!(intersections.len(), 2);
@@ -232,7 +232,7 @@ mod tests {
     #[test]
     fn intersection_translated_sphere_and_ray() {
         let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
-        let mut s = Sphere::new_unit_sphere();
+        let mut s = Sphere::new();
         s.transformation = Matrix::new_identity().translate(5.0, 0.0, 0.0);
         let intersections = r.intersects(&s);
         assert_eq!(intersections.len(), 0);
