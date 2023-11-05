@@ -1,5 +1,8 @@
 use std::ops::{Add, Mul, Sub};
 
+// Used for compare function
+const EPSILON: f64 = 0.00001;
+
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     pub red: f64,
@@ -82,7 +85,9 @@ impl Mul<Color> for Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Self) -> bool {
-        return self.red == other.red && self.green == other.green && self.blue == other.blue;
+        (self.red - other.red).abs() < EPSILON
+            && (self.green - other.green).abs() < EPSILON
+            && (self.blue - other.blue).abs() < EPSILON
     }
 
     fn ne(&self, other: &Self) -> bool {
@@ -93,13 +98,6 @@ impl PartialEq for Color {
 #[cfg(test)]
 mod tests {
     use super::*;
-    const EPSILON: f64 = 0.00001;
-
-    pub fn approximate_eq(lhs: Color, rhs: Color) -> bool {
-        (lhs.red - rhs.red).abs() < EPSILON
-            && (lhs.green - rhs.green).abs() < EPSILON
-            && (lhs.blue - rhs.blue).abs() < EPSILON
-    }
 
     #[test]
     fn color_create() {
@@ -120,20 +118,20 @@ mod tests {
     fn color_subtract() {
         let c1 = Color::color(0.9, 0.6, 0.75);
         let c2 = Color::color(0.7, 0.1, 0.25);
-        assert!(approximate_eq(c1 - c2, Color::color(0.2, 0.5, 0.5)));
+        assert_eq!(c1 - c2, Color::color(0.2, 0.5, 0.5));
     }
 
     #[test]
     fn color_multiply_with_scalar() {
         let c1 = Color::color(0.2, 0.3, 0.4);
-        assert!(approximate_eq(c1 * 2.0, Color::color(0.4, 0.6, 0.8)));
+        assert_eq!(c1 * 2.0, Color::color(0.4, 0.6, 0.8));
     }
 
     #[test]
     fn color_multiply_with_color() {
         let c1 = Color::color(1.0, 0.2, 0.4);
         let c2 = Color::color(0.9, 1.0, 0.1);
-        assert!(approximate_eq(c1 * c2, Color::color(0.9, 0.2, 0.04)));
+        assert_eq!(c1 * c2, Color::color(0.9, 0.2, 0.04));
     }
 
     #[test]
