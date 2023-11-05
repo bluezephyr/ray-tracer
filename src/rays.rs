@@ -1,6 +1,8 @@
 use crate::matrices::{to_matrix, to_tuple, Matrix};
+use crate::shapes::Normal;
 use crate::shapes::Sphere;
 use crate::tuple::{dot, Tuple};
+use crate::world::World;
 
 #[derive(Debug)]
 pub struct Ray {
@@ -12,6 +14,16 @@ pub struct Ray {
 pub struct Intersection<'a> {
     pub t: f64,
     pub object: &'a Sphere,
+}
+
+#[derive(Debug)]
+pub struct Computations<'a> {
+    pub t: f64,
+    pub object: &'a Sphere,
+    pub point: Tuple,
+    pub eyev: Tuple,
+    pub normalv: Tuple,
+    pub inside: bool,
 }
 
 // The referenced object must live at least as long as the intersection object
@@ -75,10 +87,40 @@ impl Ray {
         return intersections;
     }
 
+    // Find all the intersections of the ray in the world and return them
+    // Make sure that they are sorted
+    pub fn intersections_in_world<'a>(&self, world: &'a World) -> Vec<Intersection<'a>> {
+        let mut intersections = Vec::new();
+        for object in &world.objects {
+            intersections.append(&mut self.intersects(object));
+        }
+        intersections.sort_by(|a, b| a.t.total_cmp(&b.t));
+        return intersections;
+    }
+
     pub fn transform(&self, transformation: &Matrix<4, 4>) -> Ray {
         Ray {
             origin: to_tuple(&(transformation * &to_matrix(&self.origin))),
             direction: to_tuple(&(transformation * &to_matrix(&self.direction))),
+        }
+    }
+
+    pub fn prepare_computations<'a>(&self, intersection: &Intersection<'a>) -> Computations<'a> {
+        let position = self.position(intersection.t);
+        let eyev = -self.direction;
+        let mut normalv = intersection.object.normal_at(&position);
+        let mut inside = false;
+        if dot(&normalv, &eyev) < 0. {
+            inside = true;
+            normalv = -normalv;
+        }
+        Computations {
+            t: intersection.t,
+            object: intersection.object,
+            point: position,
+            eyev,
+            normalv,
+            inside,
         }
     }
 }
@@ -236,5 +278,52 @@ mod tests {
         s.transformation = Matrix::new_identity().translate(5.0, 0.0, 0.0);
         let intersections = r.intersects(&s);
         assert_eq!(intersections.len(), 0);
+    }
+
+    #[test]
+    fn intersections_for_default_world() {
+        let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
+        let w = World::default_world();
+        let intersections = r.intersections_in_world(&w);
+        assert_eq!(intersections.len(), 4);
+        assert_eq!(intersections[0].t, 4.0);
+        assert_eq!(intersections[1].t, 4.5);
+        assert_eq!(intersections[2].t, 5.5);
+        assert_eq!(intersections[3].t, 6.0);
+    }
+
+    #[test]
+    fn precompute_state_of_intersection() {
+        let r = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
+        let s = Sphere::new();
+        let intersection = Intersection::new(4.0, &s);
+        let computations: Computations = r.prepare_computations(&intersection);
+        assert_eq!(computations.t, intersection.t);
+        assert_eq!(computations.object, intersection.object);
+        assert_eq!(computations.point, Tuple::point(0., 0., -1.));
+        assert_eq!(computations.eyev, Tuple::vector(0., 0., -1.));
+        assert_eq!(computations.normalv, Tuple::vector(0., 0., -1.));
+    }
+
+    #[test]
+    fn hit_when_intersection_on_the_outside() {
+        let ray = Ray::new(Tuple::point(0.0, 0.0, -5.0), Tuple::vector(0.0, 0.0, 1.0));
+        let shape = Sphere::new();
+        let intersection = Intersection::new(4.0, &shape);
+        let computations: Computations = ray.prepare_computations(&intersection);
+        assert!(!computations.inside);
+    }
+
+    #[test]
+    fn hit_when_intersection_on_the_inside() {
+        let ray = Ray::new(Tuple::point(0., 0., 0.), Tuple::vector(0., 0., 1.));
+        let shape = Sphere::new();
+        let intersection = Intersection::new(1., &shape);
+        let computations: Computations = ray.prepare_computations(&intersection);
+        assert_eq!(computations.point, Tuple::point(0., 0., 1.));
+        assert_eq!(computations.eyev, Tuple::vector(0., 0., -1.));
+        assert!(computations.inside);
+        // Normal vector is inverted since the intersection is on the inside
+        assert_eq!(computations.normalv, Tuple::vector(0., 0., -1.));
     }
 }
