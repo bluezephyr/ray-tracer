@@ -57,6 +57,19 @@ impl Sub for Tuple {
     }
 }
 
+impl Sub for &Tuple {
+    type Output = Tuple;
+
+    fn sub(self, rhs: &Tuple) -> Tuple {
+        return Tuple {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+            w: self.w - rhs.w,
+        };
+    }
+}
+
 impl Neg for Tuple {
     type Output = Tuple;
 
@@ -119,7 +132,7 @@ pub fn cross(lhs: &Tuple, rhs: &Tuple) -> Tuple {
 }
 
 pub fn reflect(vector: &Tuple, normal: &Tuple) -> Tuple {
-    return vector.sub(*normal * 2.0 * dot(vector, normal));
+    return vector.sub(&(*normal * 2.0 * dot(vector, normal)));
 }
 
 #[cfg(test)]
