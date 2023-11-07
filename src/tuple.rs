@@ -111,7 +111,11 @@ impl Div<f64> for Tuple {
 
 impl PartialEq for Tuple {
     fn eq(&self, other: &Self) -> bool {
-        return self.x == other.x && self.y == other.y && self.z == other.z && self.w == other.w;
+        const EPSILON: f64 = 0.00001;
+        (self.x - other.x).abs() < EPSILON
+            && (self.y - other.y).abs() < EPSILON
+            && (self.z - other.z).abs() < EPSILON
+            && (self.w - other.w).abs() < EPSILON
     }
 
     fn ne(&self, other: &Self) -> bool {
@@ -138,14 +142,6 @@ pub fn reflect(vector: &Tuple, normal: &Tuple) -> Tuple {
 #[cfg(test)]
 mod tests {
     use super::*;
-    const EPSILON: f64 = 0.00001;
-
-    pub(crate) fn approx_eq(lhs: Tuple, rhs: Tuple, epsilon: f64) -> bool {
-        (lhs.x - rhs.x).abs() < epsilon
-            && (lhs.y - rhs.y).abs() < epsilon
-            && (lhs.z - rhs.z).abs() < epsilon
-            && (lhs.w - rhs.w).abs() < epsilon
-    }
 
     impl Tuple {
         pub(crate) fn is_point(&self) -> bool {
@@ -394,21 +390,13 @@ mod tests {
     fn reflect_vector_at_45_deg() {
         let v = Tuple::vector(1.0, -1.0, 0.0);
         let normal = Tuple::vector(0.0, 1.0, 0.0);
-        assert!(approx_eq(
-            reflect(&v, &normal),
-            Tuple::vector(1.0, 1.0, 0.0),
-            EPSILON
-        ));
+        assert_eq!(reflect(&v, &normal), Tuple::vector(1.0, 1.0, 0.0));
     }
 
     #[test]
     fn reflect_vector_off_slanted_surface() {
         let v = Tuple::vector(0.0, -1.0, 0.0);
         let normal = Tuple::vector(2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0, 0.0);
-        assert!(approx_eq(
-            reflect(&v, &normal),
-            Tuple::vector(1.0, 0.0, 0.0),
-            EPSILON
-        ));
+        assert_eq!(reflect(&v, &normal), Tuple::vector(1.0, 0.0, 0.0));
     }
 }

@@ -271,13 +271,13 @@ pub fn to_matrix(tuple: &Tuple) -> Matrix<4, 1> {
     return Matrix::<4, 1>::new_init([[tuple.x], [tuple.y], [tuple.z], [tuple.w]]);
 }
 
-pub fn to_tuple(matrix: &Matrix<4,1>) -> Tuple {
+pub fn to_tuple(matrix: &Matrix<4, 1>) -> Tuple {
     return Tuple {
-            x: matrix.data[0][0],
-            y: matrix.data[1][0],
-            z: matrix.data[2][0],
-            w: matrix.data[3][0],
-        };
+        x: matrix.data[0][0],
+        y: matrix.data[1][0],
+        z: matrix.data[2][0],
+        w: matrix.data[3][0],
+    };
 }
 
 impl Mul<&Tuple> for &Matrix<4, 4> {
