@@ -87,7 +87,7 @@ mod tests {
 
     #[test]
     fn ppm_create_canvas_header() {
-        let canvas = Canvas::create(5, 3);
+        let canvas = Canvas::new(5, 3);
         let mut p = Ppm::new("test".to_string());
         p.add_canvas(canvas);
         assert!(p.lines[0] == "P3"); // Magic number
@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     fn ppm_create_canvas_pixel_data() {
-        let mut canvas = Canvas::create(5, 3);
+        let mut canvas = Canvas::new(5, 3);
         canvas.write_pixel(0, 0, Color::color(1.5, 0.0, 0.0));
         canvas.write_pixel(2, 1, Color::color(0.0, 0.5, 0.0));
         canvas.write_pixel(4, 2, Color::color(-0.5, 0.0, 1.5));

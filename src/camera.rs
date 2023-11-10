@@ -1,12 +1,15 @@
 use crate::matrices::{to_tuple, Matrix};
 use crate::rays::Ray;
 use crate::tuple::{cross, Tuple};
+use crate::world::World;
+use crate::Canvas;
+use crate::Color;
 use std::f64;
 
 #[derive(Debug)]
 pub struct Camera {
-    pub hsize: i32,
-    pub vsize: i32,
+    pub hsize: usize,
+    pub vsize: usize,
     pub half_width: f64,
     pub half_height: f64,
     pub pixel_size: f64,
@@ -15,7 +18,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(hsize: i32, vsize: i32, field_of_view: f64) -> Camera {
+    pub fn new(hsize: usize, vsize: usize, field_of_view: f64) -> Camera {
         let half_view = (field_of_view / 2.).tan();
         let aspect = hsize as f64 / vsize as f64;
         let half_width = if aspect >= 1. {
@@ -55,7 +58,21 @@ impl Camera {
             &orientation * &Matrix::new_identity().translate(-from.x, -from.y, -from.z);
     }
 
-    pub fn ray_for_pixel(&self, x: i32, y: i32) -> Ray {
+    pub fn render(&self, world: &World) -> Canvas {
+        let mut image = Canvas::new(self.hsize, self.vsize);
+
+        for y in 0..self.vsize - 1 {
+            for x in 0..self.hsize - 1 {
+                let ray = self.ray_for_pixel(x, y);
+                let color = world.color_at(&ray);
+                image.write_pixel(x, y, color);
+            }
+        }
+
+        image
+    }
+
+    pub fn ray_for_pixel(&self, x: usize, y: usize) -> Ray {
         let x_offset = (x as f64 + 0.5) * self.pixel_size;
         let y_offset = (y as f64 + 0.5) * self.pixel_size;
 
@@ -186,6 +203,22 @@ mod tests {
         assert_eq!(
             ray.direction,
             Tuple::vector(2_f64.sqrt() / 2., 0., -2_f64.sqrt() / 2.)
+        );
+    }
+
+    #[test]
+    fn render_world_in_camera() {
+        let world = World::default_world();
+        let mut camera = Camera::new(11, 11, f64::consts::PI / 2.);
+        camera.set_view_transformation(
+            &Tuple::point(0., 0., -5.),
+            &Tuple::point(0., 0., 0.),
+            &Tuple::vector(0., 1., 0.),
+        );
+        let image = camera.render(&world);
+        assert_eq!(
+            image.read_pixel(5, 5),
+            Some(Color::color(0.38066, 0.47583, 0.2855))
         );
     }
 }

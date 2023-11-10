@@ -15,7 +15,7 @@ pub struct Coordinate {
 }
 
 impl Canvas {
-    pub fn create(x: usize, y: usize) -> Canvas {
+    pub fn new(x: usize, y: usize) -> Canvas {
         let mut c = Canvas {
             width: x,
             height: y,
@@ -81,7 +81,7 @@ mod tests {
 
     #[test]
     fn canvas_create() {
-        let c = Canvas::create(COLS, ROWS);
+        let c = Canvas::new(COLS, ROWS);
 
         for row in 0..ROWS {
             for col in 0..COLS {
@@ -92,7 +92,7 @@ mod tests {
 
     #[test]
     fn canvas_write_pixel() {
-        let mut c = Canvas::create(COLS, ROWS);
+        let mut c = Canvas::new(COLS, ROWS);
         let red = Color::color(1.0, 0.0, 0.0);
         c.write_pixel(2, 3, red);
         assert!(c.read_pixel(2, 3) == Some(Color::color(1.0, 0.0, 0.0)));
@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     fn canvas_write_ignore_if_pixel_outside() {
-        let mut c = Canvas::create(COLS, ROWS);
+        let mut c = Canvas::new(COLS, ROWS);
         let red = Color::color(1.0, 0.0, 0.0);
         c.write_pixel(21, 3, red);
         c.write_pixel(2, 13, red);
@@ -111,7 +111,7 @@ mod tests {
 
     #[test]
     fn canvas_iterate_over_all_pixels() {
-        let mut c = Canvas::create(COLS, ROWS);
+        let mut c = Canvas::new(COLS, ROWS);
         let red = Color::color(1.0, 0.0, 0.0);
         c.write_pixel(10, 3, red);
         c.write_pixel(2, 5, red);

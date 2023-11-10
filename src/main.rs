@@ -79,7 +79,7 @@ fn create_trajectory() {
     };
 
     let mut image = Ppm::new("trajectory.ppm".to_string());
-    let mut canvas = Canvas::create(900, 550);
+    let mut canvas = Canvas::new(900, 550);
     print_trajectory(&mut canvas, &mut projectile, garden);
     image.add_canvas(canvas);
     image.write_file();
@@ -104,7 +104,7 @@ fn print_clock_hours(canvas: &mut Canvas) {
 fn create_clock() {
     println!("Creating a clock image: clock.ppm");
     let mut image = Ppm::new("clock.ppm".to_string());
-    let mut canvas = Canvas::create(400, 400);
+    let mut canvas = Canvas::new(400, 400);
     print_clock_hours(&mut canvas);
     image.add_canvas(canvas);
     image.write_file();
@@ -146,7 +146,7 @@ fn generate_sphere_shadow(canvas: &mut Canvas) {
 fn trace_shadow() {
     println!("Primitive ray tracing of a sphere's 'shadow' on a wall. Please wait...");
     let mut image = Ppm::new("shadow.ppm".to_string());
-    let mut canvas = Canvas::create(300, 300);
+    let mut canvas = Canvas::new(300, 300);
     generate_sphere_shadow(&mut canvas);
     image.add_canvas(canvas);
     image.write_file();
@@ -198,7 +198,7 @@ fn generate_phong_reflection(canvas: &mut Canvas) {
 fn phong_reflection() {
     println!("Ray tracing using the Phong reflection model. Please wait...");
     let mut image = Ppm::new("sphere.ppm".to_string());
-    let mut canvas = Canvas::create(300, 300);
+    let mut canvas = Canvas::new(300, 300);
     generate_phong_reflection(&mut canvas);
     image.add_canvas(canvas);
     image.write_file();

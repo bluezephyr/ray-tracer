@@ -1,8 +1,5 @@
 use std::ops::{Add, Mul, Sub};
 
-// Used for compare function
-const EPSILON: f64 = 0.00001;
-
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     pub red: f64,
@@ -85,6 +82,7 @@ impl Mul<Color> for Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Self) -> bool {
+        const EPSILON: f64 = 0.00001;
         (self.red - other.red).abs() < EPSILON
             && (self.green - other.green).abs() < EPSILON
             && (self.blue - other.blue).abs() < EPSILON
