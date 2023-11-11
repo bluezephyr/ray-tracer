@@ -3,7 +3,6 @@ use crate::rays::Ray;
 use crate::tuple::{cross, Tuple};
 use crate::world::World;
 use crate::Canvas;
-use crate::Color;
 use std::f64;
 
 #[derive(Debug)]
@@ -98,6 +97,7 @@ impl Camera {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Color;
 
     #[test]
     fn new_camera() {

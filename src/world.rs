@@ -1,9 +1,7 @@
 use crate::lights::{lighting, PointLight};
 use crate::rays::{hit, Computation, Ray};
-use crate::shapes::{Material, Sphere};
+use crate::shapes::Sphere;
 use crate::Color;
-use crate::Matrix;
-use crate::Tuple;
 
 #[derive(Debug)]
 pub struct World {
@@ -18,35 +16,6 @@ impl World {
             objects: Vec::new(),
             lights: Vec::new(),
         }
-    }
-
-    // The default world contains a light source and two spheres
-    pub fn default_world() -> World {
-        let mut w = World::new();
-        let light = PointLight::new(
-            Tuple::point(-10.0, 10.0, -10.0),
-            Color::color(1.0, 1.0, 1.0),
-        );
-        let m1 = Material {
-            color: Color::color(0.8, 1.0, 0.6),
-            ambient: 0.1,
-            diffuse: 0.7,
-            specular: 0.2,
-            shininess: 200.0,
-        };
-        let s1 = Sphere {
-            pos: Tuple::point(0.0, 0.0, 0.0),
-            radius: 1.0,
-            transformation: Matrix::<4, 4>::new_identity(),
-            material: m1,
-        };
-        let mut s2 = Sphere::new();
-        s2.transformation = Matrix::new_identity().scale(0.5, 0.5, 0.5);
-
-        w.lights.push(light);
-        w.objects.push(s1);
-        w.objects.push(s2);
-        return w;
     }
 
     pub fn shade_hit(&self, computation: &Computation) -> Color {
@@ -71,6 +40,40 @@ impl World {
 mod tests {
     use super::*;
     use crate::rays::Intersection;
+    use crate::shapes::Material;
+    use crate::Matrix;
+    use crate::Tuple;
+
+    // The default world contains a light source and two spheres
+    impl World {
+        pub fn default_world() -> World {
+            let mut w = World::new();
+            let light = PointLight::new(
+                Tuple::point(-10.0, 10.0, -10.0),
+                Color::color(1.0, 1.0, 1.0),
+            );
+            let m1 = Material {
+                color: Color::color(0.8, 1.0, 0.6),
+                ambient: 0.1,
+                diffuse: 0.7,
+                specular: 0.2,
+                shininess: 200.0,
+            };
+            let s1 = Sphere {
+                pos: Tuple::point(0.0, 0.0, 0.0),
+                radius: 1.0,
+                transformation: Matrix::<4, 4>::new_identity(),
+                material: m1,
+            };
+            let mut s2 = Sphere::new();
+            s2.transformation = Matrix::new_identity().scale(0.5, 0.5, 0.5);
+
+            w.lights.push(light);
+            w.objects.push(s1);
+            w.objects.push(s2);
+            return w;
+        }
+    }
 
     #[test]
     fn create_world() {
@@ -81,7 +84,7 @@ mod tests {
     }
 
     #[test]
-    fn default_world() {
+    fn create_default_world() {
         let light = PointLight::new(
             Tuple::point(-10.0, 10.0, -10.0),
             Color::color(1.0, 1.0, 1.0),

@@ -26,13 +26,6 @@ pub struct Computation<'a> {
     pub inside: bool,
 }
 
-// The referenced object must live at least as long as the intersection object
-impl<'a> Intersection<'a> {
-    pub fn new(t: f64, object: &'a Sphere) -> Intersection<'a> {
-        Intersection { t, object }
-    }
-}
-
 // Return a reference to the intersection with the lowest non-negative t value
 pub fn hit<'a>(intersections: &'a Vec<Intersection<'a>>) -> Option<&'a Intersection<'a>> {
     if intersections.is_empty() {
@@ -129,6 +122,13 @@ impl Ray {
 mod tests {
     use super::*;
     use std::ptr;
+
+    // The referenced object must live at least as long as the intersection object
+    impl<'a> Intersection<'a> {
+        pub fn new(t: f64, object: &'a Sphere) -> Intersection<'a> {
+            Intersection { t, object }
+        }
+    }
 
     #[test]
     fn create_and_query_a_ray() {

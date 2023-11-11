@@ -6,8 +6,6 @@ by Jamis Buck.
 
 [<img src="doc/bookcover.jpg" width="30%" height="30%" />](http://raytracerchallenge.com/)
 
-## Current status
-
 The ray tracer provides a few commands to generate images using matrix
 operations, vector functions and so on to calculate how pixels on a canvas
 shall be colored. The current available commands are: *sphere*, *shadow*,
@@ -22,15 +20,44 @@ The images can be viewed (on Linux) using, for example, the command `feh`. Use:
 
 to show the 'shadow.ppm' image.
 
+To convert ppm files to other file formats, the `convert` command from the
+`imagemagick` tool suite can be used. Use:
+
+`convert shadow.ppm shadow.png`
+
+to convert the shadow ppm file to png format. Other extensions, such as .gif
+and jpg also works.
+
+
+## Ray tracing model
+
+The ray tracer uses the [Phong reflection
+model](https://en.wikipedia.org/wiki/Phong_reflection_model) to simulate the
+reflection of light off objects. For more information, see the Wikipedia page.
+
+## Commands
+
+### World
+
+The `world` command generates an image of a pre-configured world consisting of
+three spheres located in a "room". A light source is located at `(-10, 10,
+-10)` and a camera is located at `(0, 1.5, -5)` directed at the point `(0, 1,
+0)`. The resolution of the camera is 600x300 pixels.
+
+The rendering is done by sending a ray from the camera's origin through each
+pixel in the camera direction and then using the Phong reflection model to
+calculate the color. The resulting image is stored in a file called
+'world.ppm'.
+
+![World](doc/world.png)
+
 ### Sphere
 
-The `sphere` command uses the [Phong reflection
-model](https://en.wikipedia.org/wiki/Phong_reflection_model) to simulate the
-reflection of light off an object; in this case a sphere. In the simulation, a
-light source is located at `(-10, 10, -10)` and its light is reflected off a
-blue sphere at origo with the radius of 1. The reflections are captured on a
-canvas at z position 12. The Phong reflection modeul is used to calculate the
-colors of the pixels at the canvas.
+The `sphere` command simulates the reflection of light off an object; in this
+case a sphere. In the simulation, a light source is located at `(-10, 10, -10)`
+and its light is reflected off a blue sphere at origo with the radius of 1. The
+reflections are captured on a canvas at z position 12. The Phong reflection
+model is used to calculate the colors of the pixels at the canvas.
 
 ![Sphere](doc/sphere.png)
 

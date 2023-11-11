@@ -9,11 +9,13 @@ mod shapes;
 mod tuple;
 mod world;
 
+use crate::camera::Camera;
 use crate::canvas::{Canvas, Coordinate};
 use crate::color::Color;
 use crate::lights::{lighting, PointLight};
 use crate::rays::hit;
 use crate::shapes::{Normal, Sphere};
+use crate::world::World;
 use matrices::{to_tuple, Matrix};
 use ppm::Ppm;
 use std::{env, f64, process};
@@ -205,6 +207,91 @@ fn phong_reflection() {
     println!("Image saved in file: sphere.ppm");
 }
 
+fn pre_configure_world() -> World {
+    let mut world = World::new();
+    let light = PointLight::new(
+        Tuple::point(-10.0, 10.0, -10.0),
+        Color::color(1.0, 1.0, 1.0),
+    );
+    world.lights.push(light);
+
+    // The floor and the walls are just transformed spheres
+    let mut floor = Sphere::new();
+    floor.transformation = Matrix::new_identity().scale(10., 0.01, 10.);
+    floor.material.color = Color::color(1., 0.9, 0.9);
+    floor.material.specular = 0.;
+    world.objects.push(floor);
+
+    // Left wall
+    let mut left_wall = Sphere::new();
+    left_wall.transformation = Matrix::new_identity()
+        .scale(10., 0.01, 10.)
+        .rotate_x(f64::consts::PI / 2.)
+        .rotate_y(-f64::consts::PI / 4.)
+        .translate(0., 0., 5.);
+    left_wall.material.color = Color::color(1., 0.9, 0.9);
+    left_wall.material.specular = 0.;
+    world.objects.push(left_wall);
+
+    // Right wall
+    let mut right_wall = Sphere::new();
+    right_wall.transformation = Matrix::new_identity()
+        .scale(10., 0.01, 10.)
+        .rotate_x(f64::consts::PI / 2.)
+        .rotate_y(f64::consts::PI / 4.)
+        .translate(0., 0., 5.);
+    right_wall.material.color = Color::color(1., 0.9, 0.9);
+    right_wall.material.specular = 0.;
+    world.objects.push(right_wall);
+
+    // Large sphere in the middle: Green and translated slightly upward
+    let mut middle = Sphere::new();
+    middle.transformation = Matrix::new_identity()
+        .translate(-0.5, 1.0, 0.5);
+    middle.material.color = Color::color(0.0, 0.5, 1.0);
+    middle.material.diffuse = 0.7;
+    middle.material.specular = 0.3;
+    world.objects.push(middle);
+
+    // Smaller sphere on the right: Green
+    let mut right = Sphere::new();
+    right.transformation = Matrix::new_identity()
+        .scale(0.5, 0.5, 0.5)
+        .translate(1.5, 0.5, -0.5);
+    right.material.color = Color::color(0.1, 1.0, 0.5);
+    right.material.diffuse = 0.7;
+    right.material.specular = 0.3;
+    world.objects.push(right);
+
+    // Smallest sphere on the left: Green
+    let mut left = Sphere::new();
+    left.transformation = Matrix::new_identity()
+        .scale(0.33, 0.33, 0.33)
+        .translate(-1.5, 0.33, -0.75);
+    left.material.color = Color::color(1.0, 0.8, 0.1);
+    left.material.diffuse = 0.7;
+    left.material.specular = 0.3;
+    world.objects.push(left);
+
+    world
+}
+
+fn ray_trace_world() {
+    println!("Ray tracing a pre-configured world using the Phong reflection model. Please wait...");
+    let mut camera = Camera::new(600, 300, f64::consts::PI / 3.);
+    camera.set_view_transformation(
+        &Tuple::point(0., 1.5, -5.),
+        &Tuple::point(0., 1., 0.),
+        &Tuple::vector(0., 1., 0.),
+    );
+    let world = pre_configure_world();
+
+    let mut image = Ppm::new("world.ppm".to_string());
+    image.add_canvas(camera.render(&world));
+    image.write_file();
+    println!("Image saved in file: world.ppm");
+}
+
 fn main() {
     println!("Welcome to the simple Ray Tracer!");
     let args: Vec<String> = env::args().collect();
@@ -216,6 +303,7 @@ fn main() {
         println!("clock      - Create an simple clock case with a dot for each hour");
         println!("shadow     - Primitive ray tracing of a sphere's 'shadow' on a wall");
         println!("sphere     - First ray tracing using Phong reflection model");
+        println!("world      - Create a ray traced image of a pre-configured world");
         process::exit(1);
     });
 
@@ -224,6 +312,7 @@ fn main() {
         "clock" => create_clock(),
         "shadow" => trace_shadow(),
         "sphere" => phong_reflection(),
+        "world" => ray_trace_world(),
         _ => println!("Unknown command '{}'", config.command.as_str()),
     }
 }
