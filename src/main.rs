@@ -319,10 +319,10 @@ fn ray_trace_world() {
 }
 
 fn ray_trace_planets() {
-    println!("Creating an animation of planets. Please wait...");
-    const FRAMES: i32 = 100;
+    println!("Creating an animation of planets. WARNING! Takes a long time. Please wait...");
+    const FRAMES: i32 = 200;
     const NAME: &str = "planet";
-    let mut camera = Camera::new(300, 150, f64::consts::PI / 3.);
+    let mut camera = Camera::new(600, 300, f64::consts::PI / 3.);
 
     for frame in 0..FRAMES {
         let angle = f64::consts::PI * 2. / FRAMES as f64 * frame as f64;
@@ -334,6 +334,8 @@ fn ray_trace_planets() {
         let world = planets_world(angle);
 
         let name = if frame < 10 {
+            format!("{}-00{}.ppm", NAME, frame)
+        } else if frame < 100 {
             format!("{}-0{}.ppm", NAME, frame)
         } else {
             format!("{}-{}.ppm", NAME, frame)
@@ -341,11 +343,10 @@ fn ray_trace_planets() {
 
         let mut image = Ppm::new(&name);
         println!(
-            "Generating image {}/{}: {} {}",
+            "Generating image {}/{}: {}",
             frame,
             FRAMES - 1,
-            name,
-            angle
+            name
         );
         image.add_canvas(camera.render(&world));
         image.write_file();
