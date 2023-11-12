@@ -51,6 +51,15 @@ calculate the color. The resulting image is stored in a file called
 
 ![World](doc/world.png)
 
+### Planets
+
+The `planets` command generates a set of images that can be used to create an
+animation. To create an animated gif, use the following command:
+
+`convert -delay 0.5 -loop 0 planet-* planets.gif`
+
+![Planets](doc/planets.gif)
+
 ### Sphere
 
 The `sphere` command simulates the reflection of light off an object; in this

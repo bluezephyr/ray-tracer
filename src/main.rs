@@ -80,7 +80,7 @@ fn create_trajectory() {
         wind: Tuple::vector(-0.01, 0.0, 0.0),
     };
 
-    let mut image = Ppm::new("trajectory.ppm".to_string());
+    let mut image = Ppm::new(&"trajectory.ppm".to_string());
     let mut canvas = Canvas::new(900, 550);
     print_trajectory(&mut canvas, &mut projectile, garden);
     image.add_canvas(canvas);
@@ -105,7 +105,7 @@ fn print_clock_hours(canvas: &mut Canvas) {
 
 fn create_clock() {
     println!("Creating a clock image: clock.ppm");
-    let mut image = Ppm::new("clock.ppm".to_string());
+    let mut image = Ppm::new(&"clock.ppm".to_string());
     let mut canvas = Canvas::new(400, 400);
     print_clock_hours(&mut canvas);
     image.add_canvas(canvas);
@@ -147,7 +147,7 @@ fn generate_sphere_shadow(canvas: &mut Canvas) {
 
 fn trace_shadow() {
     println!("Primitive ray tracing of a sphere's 'shadow' on a wall. Please wait...");
-    let mut image = Ppm::new("shadow.ppm".to_string());
+    let mut image = Ppm::new(&"shadow.ppm".to_string());
     let mut canvas = Canvas::new(300, 300);
     generate_sphere_shadow(&mut canvas);
     image.add_canvas(canvas);
@@ -199,7 +199,7 @@ fn generate_phong_reflection(canvas: &mut Canvas) {
 
 fn phong_reflection() {
     println!("Ray tracing using the Phong reflection model. Please wait...");
-    let mut image = Ppm::new("sphere.ppm".to_string());
+    let mut image = Ppm::new(&"sphere.ppm".to_string());
     let mut canvas = Canvas::new(300, 300);
     generate_phong_reflection(&mut canvas);
     image.add_canvas(canvas);
@@ -207,10 +207,10 @@ fn phong_reflection() {
     println!("Image saved in file: sphere.ppm");
 }
 
-fn pre_configure_world() -> World {
+fn pre_configure_world(light_x: f64) -> World {
     let mut world = World::new();
     let light = PointLight::new(
-        Tuple::point(-10.0, 10.0, -10.0),
+        Tuple::point(light_x, 10.0, -10.0),
         Color::color(1.0, 1.0, 1.0),
     );
     world.lights.push(light);
@@ -244,10 +244,9 @@ fn pre_configure_world() -> World {
     right_wall.material.specular = 0.;
     world.objects.push(right_wall);
 
-    // Large sphere in the middle: Green and translated slightly upward
+    // Large sphere in the middle: Blue and translated slightly upward
     let mut middle = Sphere::new();
-    middle.transformation = Matrix::new_identity()
-        .translate(-0.5, 1.0, 0.5);
+    middle.transformation = Matrix::new_identity().translate(-0.5, 1.0, 0.5);
     middle.material.color = Color::color(0.0, 0.5, 1.0);
     middle.material.diffuse = 0.7;
     middle.material.specular = 0.3;
@@ -263,7 +262,7 @@ fn pre_configure_world() -> World {
     right.material.specular = 0.3;
     world.objects.push(right);
 
-    // Smallest sphere on the left: Green
+    // Smallest sphere on the left: Yellow
     let mut left = Sphere::new();
     left.transformation = Matrix::new_identity()
         .scale(0.33, 0.33, 0.33)
@@ -276,6 +275,33 @@ fn pre_configure_world() -> World {
     world
 }
 
+fn planets_world(angle: f64) -> World {
+    let mut world = World::new();
+    let light = PointLight::new(Tuple::point(-10., 10.0, -10.0), Color::color(1.0, 1.0, 1.0));
+    world.lights.push(light);
+
+    // Large sphere in the middle: Blue
+    let mut middle = Sphere::new();
+    middle.transformation = Matrix::new_identity();
+    middle.material.color = Color::color(0.0, 0.5, 1.0);
+    middle.material.diffuse = 0.7;
+    middle.material.specular = 0.3;
+    world.objects.push(middle);
+
+    // Rotating planet
+    let mut left = Sphere::new();
+    let x_pos = angle.cos() * 4.;
+    let z_pos = angle.sin() * 4.;
+    left.transformation = Matrix::new_identity()
+        .scale(0.33, 0.33, 0.33)
+        .translate(x_pos, 0., z_pos);
+    left.material.color = Color::color(1.0, 0.8, 0.1);
+    left.material.diffuse = 0.7;
+    left.material.specular = 0.3;
+    world.objects.push(left);
+
+    world
+}
 fn ray_trace_world() {
     println!("Ray tracing a pre-configured world using the Phong reflection model. Please wait...");
     let mut camera = Camera::new(600, 300, f64::consts::PI / 3.);
@@ -284,12 +310,47 @@ fn ray_trace_world() {
         &Tuple::point(0., 1., 0.),
         &Tuple::vector(0., 1., 0.),
     );
-    let world = pre_configure_world();
+    let world = pre_configure_world(-10.);
 
-    let mut image = Ppm::new("world.ppm".to_string());
+    let mut image = Ppm::new(&"world.ppm".to_string());
     image.add_canvas(camera.render(&world));
     image.write_file();
     println!("Image saved in file: world.ppm");
+}
+
+fn ray_trace_planets() {
+    println!("Creating an animation of planets. Please wait...");
+    const FRAMES: i32 = 100;
+    const NAME: &str = "planet";
+    let mut camera = Camera::new(300, 150, f64::consts::PI / 3.);
+
+    for frame in 0..FRAMES {
+        let angle = f64::consts::PI * 2. / FRAMES as f64 * frame as f64;
+        camera.set_view_transformation(
+            &Tuple::point(0., 1.5, -8.),
+            &Tuple::point(0., 0., 0.),
+            &Tuple::vector(0., 1., 0.),
+        );
+        let world = planets_world(angle);
+
+        let name = if frame < 10 {
+            format!("{}-0{}.ppm", NAME, frame)
+        } else {
+            format!("{}-{}.ppm", NAME, frame)
+        };
+
+        let mut image = Ppm::new(&name);
+        println!(
+            "Generating image {}/{}: {} {}",
+            frame,
+            FRAMES - 1,
+            name,
+            angle
+        );
+        image.add_canvas(camera.render(&world));
+        image.write_file();
+    }
+    println!("Done");
 }
 
 fn main() {
@@ -304,6 +365,7 @@ fn main() {
         println!("shadow     - Primitive ray tracing of a sphere's 'shadow' on a wall");
         println!("sphere     - First ray tracing using Phong reflection model");
         println!("world      - Create a ray traced image of a pre-configured world");
+        println!("planets    - Create a ray traced animation of two planets");
         process::exit(1);
     });
 
@@ -313,6 +375,7 @@ fn main() {
         "shadow" => trace_shadow(),
         "sphere" => phong_reflection(),
         "world" => ray_trace_world(),
+        "planets" => ray_trace_planets(),
         _ => println!("Unknown command '{}'", config.command.as_str()),
     }
 }

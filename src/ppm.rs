@@ -11,9 +11,9 @@ pub struct Ppm {
 const MAX_LINELEN: usize = 70;
 
 impl Ppm {
-    pub fn new(filename: String) -> Ppm {
+    pub fn new(filename: &String) -> Ppm {
         let ppm = Ppm {
-            filename,
+            filename : filename.to_string(),
             lines: vec![],
         };
         return ppm;
@@ -81,14 +81,14 @@ mod tests {
 
     #[test]
     fn ppm_empty_after_creation() {
-        let p = Ppm::new("test".to_string());
+        let p = Ppm::new(&"test".to_string());
         assert!(p.lines.len() == 0);
     }
 
     #[test]
     fn ppm_create_canvas_header() {
         let canvas = Canvas::new(5, 3);
-        let mut p = Ppm::new("test".to_string());
+        let mut p = Ppm::new(&"test".to_string());
         p.add_canvas(canvas);
         assert!(p.lines[0] == "P3"); // Magic number
         assert!(p.lines[1] == "5 3"); // Width and height
@@ -101,7 +101,7 @@ mod tests {
         canvas.write_pixel(0, 0, Color::color(1.5, 0.0, 0.0));
         canvas.write_pixel(2, 1, Color::color(0.0, 0.5, 0.0));
         canvas.write_pixel(4, 2, Color::color(-0.5, 0.0, 1.5));
-        let mut p = Ppm::new("test".to_string());
+        let mut p = Ppm::new(&"test".to_string());
         p.add_canvas(canvas);
         assert!(
             p.lines[3] == "255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 128 0 0 0 0 0 0 0 0 0 0"
